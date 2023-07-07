@@ -51,7 +51,6 @@ int main(){
     float value[6];
     while (true) {
         getdata();
-        sensor_reader(value);
         if(select){
             sig = 1;
         }if(start){
@@ -117,6 +116,7 @@ void sensor_reader(float* value){
 void autorun(float* value){
     while(batu != 1){
         getdata();
+        sensor_reader(value);
         send(MIGI_MAE,      SLW);
         send(HIDARI_MAE,    SLW);
         send(MIGI_USIRO,    SLW);
