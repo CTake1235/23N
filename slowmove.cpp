@@ -100,7 +100,7 @@ void getdata(void){
     hidari  = ps3.getButtonState(PS3::hidari);
     migi    = ps3.getButtonState(PS3::migi);
 
-    batu = ps3.getButtonState(PS3::batu);
+    batu    = ps3.getButtonState(PS3::batu);
 
     select  = ps3.getSELECTState();
     start   = ps3.getSTARTState();
@@ -115,12 +115,8 @@ void sensor_reader(float* value){
     value[5] = LB.read();
 }
 void autorun(float* value){
-    while(batu != 1){
+    while(!batu){
         getdata();
-        send(MIGI_MAE,      SLW);
-        send(HIDARI_MAE,    SLW);
-        send(MIGI_USIRO,    SLW);
-        send(HIDARI_USIRO,  SLW);
         if(value[0] >= WOOD || value[1] >= WOOD){
             air1 = 1;
         }else if (value[2] >= WOOD || value[3] >= WOOD){
@@ -131,6 +127,11 @@ void autorun(float* value){
             air3 = 1;
             ThisThread::sleep_for(1000ms);
             air3 = 0;
+        }else{
+            send(MIGI_MAE,      SLW);
+            send(HIDARI_MAE,    SLW);
+            send(MIGI_USIRO,    SLW);
+            send(HIDARI_USIRO,  SLW);
         }
     }
 }
