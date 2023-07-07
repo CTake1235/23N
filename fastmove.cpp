@@ -43,6 +43,7 @@ void        send(char add, char dat);
 void        getdata(void);
 void        sensor_reader(float*);
 void        autorun(float*);
+int         parallel_check(float*);
 
 bool ue,sita,migi,hidari,select,start,batu,maru;
 
@@ -51,7 +52,6 @@ int main(){
     float value[6];
     while (true) {
         getdata();
-        sensor_reader(value);
         if(select){
             sig = 1;
         }if(start){
@@ -114,23 +114,16 @@ void sensor_reader(float* value){
     value[4] = RB.read();
     value[5] = LB.read();
 }
-void autorun(float* value){
-    while(batu != 1){
-        getdata();
-        send(MIGI_MAE,      SLW);
-        send(HIDARI_MAE,    SLW);
-        send(MIGI_USIRO,    SLW);
-        send(HIDARI_USIRO,  SLW);
-        if(value[0] >= WOOD || value[1] >= WOOD){
-            air1 = 1;
-        }else if (value[2] >= WOOD || value[3] >= WOOD){
-            air1 = 0;
-            air2 = 1;
-        }else if(value[4] >= WOOD || value[5] >= WOOD){
-            air2 = 0;
-            air3 = 1;
-            ThisThread::sleep_for(1000ms);
-            air3 = 0;
-        }
+
+int parallel_check(float* value){
+    float limit_top = value[0] + 0.3;
+    float limit_bottom = value[0] - 0.3;
+    // だいたい同じ値のとき
+    if(limit_top >= value[1] && limit_bottom <= value[1]){
+        return 0;
+    }else if(limit_top <= value[1]){
+        return 1;
+    }else{
+        return 2;
     }
 }
