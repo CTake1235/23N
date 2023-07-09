@@ -139,11 +139,10 @@ void autorun(float* value){
             air3 = 1;
             ThisThread::sleep_for(1000ms);
             air3 = 0;
-        }else{
-            send(MIGI_MAE,      SLW);
-            send(HIDARI_MAE,    SLW);
-            send(MIGI_USIRO,    SLW);
-            send(HIDARI_USIRO,  SLW);
         }
+        send(MIGI_MAE,      SLW);
+        send(HIDARI_MAE,    SLW);
+        send(MIGI_USIRO,    SLW);
+        send(HIDARI_USIRO,  SLW);
     }
 }
