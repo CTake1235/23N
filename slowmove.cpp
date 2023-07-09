@@ -26,9 +26,9 @@ DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
 DigitalIn   led(PC_10);     //状態確認
 
 //エアシリンダーズ
-DigitalOut  air1(PA_12);
-DigitalOut  air2(PA_11);
-DigitalOut  air3(PB_12);
+DigitalOut  air1(PA_12); // 前輪
+DigitalOut  air2(PA_11); // 中輪
+DigitalOut  air3(PB_12); // 後輪
 
 //赤外線センサーズ
 AnalogIn    RF(PA_6); // 右前
