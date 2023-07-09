@@ -14,7 +14,7 @@
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 static char  FWD = 0xe0;
 static char  BCK = 0x20;
-static char  STB = 0x80;
+static char  BRK = 0x80;
 static char  SLW = 0xc0;
 
 PS3         ps3(A0,A1);     //PA_9,PA_10
@@ -99,10 +99,10 @@ int main(){
             autorun(value);
         }
         else{
-            send(MIGI_MAE,      STB);
-            send(HIDARI_MAE,    STB);
-            send(MIGI_USIRO,    STB);
-            send(HIDARI_USIRO,  STB);
+            send(MIGI_MAE,      BRK);
+            send(HIDARI_MAE,    BRK);
+            send(MIGI_USIRO,    BRK);
+            send(HIDARI_USIRO,  BRK);
         }
     }
 }
