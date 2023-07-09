@@ -120,12 +120,21 @@ void sensor_reader(float* value){
 void autorun(float* value){
     while(!batu){
         getdata();
+
+        // 前方ふたつが読み取っていた場合: 前輪持ち上げ
         if(value[0] >= WOOD || value[1] >= WOOD){
             air1 = 1;
-        }else if (value[2] >= WOOD || value[3] >= WOOD){
+        }
+
+        // 中間ふたつ: 前輪下げ、中輪上げ 
+        else if (value[2] >= WOOD || value[3] >= WOOD){
             air1 = 0;
             air2 = 1;
-        }else if(value[4] >= WOOD || value[5] >= WOOD){
+        }
+
+        // 後方ふたつ: 中輪下げ、後輪上げ下げ
+        // センサー不足のため時間で対応、ここは要検討 //
+        else if(value[4] >= WOOD || value[5] >= WOOD){
             air2 = 0;
             air3 = 1;
             ThisThread::sleep_for(1000ms);
