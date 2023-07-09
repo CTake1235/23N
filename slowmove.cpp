@@ -8,13 +8,14 @@
 #define MIGI_USIRO      0x50
 #define HIDARI_USIRO    0x49
 
-// 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
-#define FWD 0xe0
-#define BCK 0x20
-#define STB 0x80
-#define SLW 0xc0
-
 #define WOOD 0.5
+
+
+// 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
+static char  FWD = 0xe0;
+static char  BCK = 0x20;
+static char  STB = 0x80;
+static char  SLW = 0xc0;
 
 PS3         ps3(A0,A1);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
