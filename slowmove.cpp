@@ -45,7 +45,7 @@ void        getdata(void);
 void        sensor_reader(float*);
 void        autorun(float*);
 
-bool ue,sita,migi,hidari,select,start,batu,maru;
+bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
 
 int main(){
     sig = 0;
@@ -55,31 +55,50 @@ int main(){
         sensor_reader(value);
         if(select){
             sig = 1;
-        }if(start){
+        }
+        else if(start){
             sig = 0;
-        }if(ue){
+        }
+        else if(ue){
             send(MIGI_MAE,      FWD);
             send(HIDARI_MAE,    FWD);
             send(MIGI_USIRO,    FWD);
             send(HIDARI_USIRO,  FWD);
-        }if(sita){
+        }
+        else if(sita){
             send(MIGI_MAE,      BCK);
             send(HIDARI_MAE,    BCK);
             send(MIGI_USIRO,    BCK);
             send(HIDARI_USIRO,  BCK);
-        }if(migi){
+        }
+        else if(migi){
             send(MIGI_MAE,      BCK);
             send(HIDARI_MAE,    FWD);
             send(MIGI_USIRO,    FWD);
             send(HIDARI_USIRO,  BCK);
-        }if(hidari){
+        }
+        else if(hidari){
             send(MIGI_MAE,      FWD);
             send(HIDARI_MAE,    BCK);
             send(MIGI_USIRO,    BCK);
             send(HIDARI_USIRO,  FWD);
-        }if(maru){
+        }
+        else if(R1){
+            send(MIGI_MAE,      SLW);
+            send(HIDARI_MAE,    FWD);
+            send(MIGI_USIRO,    SLW);
+            send(HIDARI_USIRO,  FWD);
+        }
+        else if(L1){
+            send(MIGI_MAE,      FWD);
+            send(HIDARI_MAE,    SLW);
+            send(MIGI_USIRO,    FWD);
+            send(HIDARI_USIRO,  SLW);
+        }
+        else if(maru){
             autorun(value);
-        }else{
+        }
+        else{
             send(MIGI_MAE,      STB);
             send(HIDARI_MAE,    STB);
             send(MIGI_USIRO,    STB);
@@ -96,16 +115,20 @@ void send(char add, char dat){
 }
 
 void getdata(void){
+    select  = ps3.getSELECTState();
+    start   = ps3.getSTARTState();
+
     ue      = ps3.getButtonState(PS3::ue);
     sita    = ps3.getButtonState(PS3::sita);
     hidari  = ps3.getButtonState(PS3::hidari);
     migi    = ps3.getButtonState(PS3::migi);
 
+    R1      = ps3.getButtonState(PS3::R1);
+    L1      = ps3.getButtonState(PS3::L1);
+
     maru    = ps3.getButtonState(PS3::maru);
     batu    = ps3.getButtonState(PS3::batu);
 
-    select  = ps3.getSELECTState();
-    start   = ps3.getSTARTState();
 }
 
 void sensor_reader(float* value){
