@@ -100,6 +100,7 @@ void getdata(void){
     hidari  = ps3.getButtonState(PS3::hidari);
     migi    = ps3.getButtonState(PS3::migi);
 
+    maru    = ps3.getButtonState(PS3::maru);
     batu    = ps3.getButtonState(PS3::batu);
 
     select  = ps3.getSELECTState();
@@ -114,6 +115,7 @@ void sensor_reader(float* value){
     value[4] = RB.read();
     value[5] = LB.read();
 }
+
 void autorun(float* value){
     while(!batu){
         getdata();
