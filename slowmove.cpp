@@ -43,6 +43,8 @@ void        getdata(void);
 void        sensor_reader(float*);
 void        autorun(float*);
 
+// デバッグ用関数
+void        debugger(float*);
 bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
 
 int main(){
@@ -53,10 +55,10 @@ int main(){
     air1.write(1);
     air2.write(1);
     air3.write(1);
-    
     while (true) {
         getdata();
         sensor_reader(value);
+        debugger(value);
         if(select){
             sig = 1;
         }
@@ -172,4 +174,24 @@ void autorun(float* value){
         send(MIGI_USIRO,    SLW);
         send(HIDARI_USIRO,  SLW);
     }
+}
+
+void debugger(float* value){
+    // 赤外線センサーのデータ
+    printf("value:右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
+
+    // PS3コンのデータ 
+    if(select)printf("select");
+    if(start)printf("start");
+    if(ue)printf("ue");
+    if(hidari)printf("hidari");
+    if(sita)printf("sita");
+    if(migi)printf("migi");
+    if(R1)printf("R1");
+    if(L1)printf("L1");
+    if(maru)printf("maru");
+    if(batu)printf("batu");
+
+    // 電源基板
+    printf("%d",sig.read());
 }
