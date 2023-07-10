@@ -196,5 +196,5 @@ void debugger(float* value){
     printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
 
     // 電源基板
-    printf("電源基板:\t%d\n\n",sig.read());
+    printf("電源基板: %d\n\n",sig.read());
 }
