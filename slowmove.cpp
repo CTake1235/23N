@@ -178,7 +178,7 @@ void autorun(float* value){
 
 void debugger(float* value){
     // 赤外線センサーのデータ
-    printf("value:右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
+    printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
 
     // PS3コンのデータ 
     if(select)printf("select");
