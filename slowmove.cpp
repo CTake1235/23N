@@ -193,5 +193,5 @@ void debugger(float* value){
     if(batu)printf("batu");
 
     // 電源基板
-    printf("電源基板:%d\n",sig.read());
+    printf("電源基板:%d\n\n",sig.read());
 }
