@@ -48,6 +48,12 @@ bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
 int main(){
     sig = 0;
     float value[6];
+
+    // 全エアシリをオンにする
+    air1.write(1);
+    air2.write(1);
+    air3.write(1);
+    
     while (true) {
         getdata();
         sensor_reader(value);
