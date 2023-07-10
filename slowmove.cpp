@@ -19,7 +19,7 @@ static char  SLW = 0xc0;
 
 PS3         ps3(A0,A1);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
-I2C         ChiJiKisensor(PB_4,PA_8);
+HMC5883L    ChiJiKisensor(PB_4,PA_8);
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
@@ -192,6 +192,9 @@ void debugger(float* value){
     if(maru)printf("maru");
     if(batu)printf("batu");
 
+    // 地磁気センサーの値（見るだけ）
+    printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
+
     // 電源基板
-    printf("電源基板:%d\n\n",sig.read());
+    printf("電源基板:\t%d\n\n",sig.read());
 }
