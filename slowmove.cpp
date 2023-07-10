@@ -38,8 +38,6 @@ AnalogIn    LC(PC_4); // 左中
 AnalogIn    RB(PC_2); // 右後
 AnalogIn    LB(PC_3); // 左後
 
-
-
 void        send(char add, char dat);
 void        getdata(void);
 void        sensor_reader(float*);
