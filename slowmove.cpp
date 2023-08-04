@@ -157,17 +157,21 @@ void autorun(float* value){
 
         // 中間ふたつ: 前輪下げ、中輪上げ 
         else if (value[2] >= WOOD || value[3] >= WOOD){
-            air1 = 0;
-            air2 = 1;
+            if(air1.read() == 1){
+                air1.write(0);
+                air2.write(1);      
+            }
         }
 
         // 後方ふたつ: 中輪下げ、後輪上げ下げ
         // センサー不足のため時間で対応、ここは要検討 //
         else if(value[4] >= WOOD || value[5] >= WOOD){
-            air2 = 0;
-            air3 = 1;
-            ThisThread::sleep_for(1000ms);
-            air3 = 0;
+            if(air2.read() == 1){
+                air2 = 0;
+                air3 = 1;
+                ThisThread::sleep_for(1000ms);
+                air3 = 0;
+            }
         }
         send(MIGI_MAE,      SLW);
         send(HIDARI_MAE,    SLW);
