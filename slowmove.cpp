@@ -12,10 +12,10 @@
 
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
-static char  FWD = 0xe0;
-static char  BCK = 0x20;
-static char  BRK = 0x80;
-static char  SLW = 0xc0;
+const char  FWD = 0xe0;
+const char  BCK = 0x20;
+const char  BRK = 0x80;
+const char  SLW = 0xc0;
 
 PS3         ps3(A0,A1);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
