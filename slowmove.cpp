@@ -3,10 +3,10 @@
 #include "HMC5883L.h"
 
 // MDのアドレス
-#define MIGI_MAE        0x52
-#define HIDARI_MAE      0x51
-#define MIGI_USIRO      0x50
-#define HIDARI_USIRO    0x49
+#define MIGI_MAE        0x50
+#define HIDARI_MAE      0x52
+#define MIGI_USIRO      0x54
+#define HIDARI_USIRO    0x56
 
 #define WOOD 0.5
 
@@ -17,7 +17,7 @@ const char  BCK = 0x20;
 const char  BRK = 0x80;
 const char  SLW = 0xc0;
 
-PS3         ps3(A0,A1);     //PA_9,PA_10
+PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
 HMC5883L    ChiJiKisensor(PB_4,PA_8);
 
@@ -59,10 +59,10 @@ int main(){
         getdata();
         sensor_reader(value);
         debugger(value);
-        if(select){
+        if(select == 1){
             sig = 1;
         }
-        else if(start){
+        else if(start == 1){
             sig = 0;
         }
         else if(ue){
@@ -201,5 +201,8 @@ void debugger(float* value){
     printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
 
     // 電源基板
-    printf("電源基板: %d\n\n",sig.read());
+    if(led.read() == 0)printf("12V:ON\n");
+    else printf("12V:OFF\n");
+    printf("電源スイッチ:%d\n\n",sig.read());
+    printf("-------------------------\n\n");
 }
