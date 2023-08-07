@@ -59,6 +59,7 @@ int main(){
     sig = 0;
 
     // 全エアシリをオンにする
+    // 信号が来ないとき、足回りは展開されている
     air1.write(0);
     air2.write(0);
     air3.write(0);
