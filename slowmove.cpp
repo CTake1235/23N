@@ -8,7 +8,7 @@
 #define MIGI_USIRO      0x56
 #define HIDARI_USIRO    0x50
 
-#define WOOD 80
+#define WOOD            80 // [cm]
 
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
