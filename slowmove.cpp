@@ -20,7 +20,9 @@ const char  BRK = 0x80;
 const char  SLW = 0x98;
 
 double      dis = 0;
-float value[6];
+float       value[6];
+
+Thread      th1;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -111,6 +113,7 @@ int main(){
             send(HIDARI_MAE,    SLW);
             send(MIGI_USIRO,    SLW);
             send(HIDARI_USIRO,  SLW);
+            th1.start(auto_run);
         }
         else{
             send(MIGI_MAE,      BRK);
