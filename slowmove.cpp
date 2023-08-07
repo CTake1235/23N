@@ -1,3 +1,4 @@
+// NO THREAD
 #include "mbed.h"
 #include "PS3.h"
 #include "HMC5883L.h"
