@@ -3,19 +3,23 @@
 #include "HMC5883L.h"
 
 // MDのアドレス
-#define MIGI_MAE        0x50
-#define HIDARI_MAE      0x52
-#define MIGI_USIRO      0x54
-#define HIDARI_USIRO    0x56
+#define MIGI_MAE        0x26
+#define HIDARI_MAE      0x54
+#define MIGI_USIRO      0x56
+#define HIDARI_USIRO    0x50
 
-#define WOOD 0.5
+#define WOOD 80
 
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
-const char  FWD = 0xe0;
-const char  BCK = 0x20;
+// const char  FWD = 0xe0;
+// const char  BCK = 0x20;
+const char  FWD = 0x98;
+const char  BCK = 0x62;
 const char  BRK = 0x80;
-const char  SLW = 0xc0;
+const char  SLW = 0x98;
+
+double      dis = 0;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -34,14 +38,15 @@ DigitalOut  air3(PB_12); // 後輪
 AnalogIn    RF(PA_6); // 右前
 AnalogIn    LF(PA_7); // 左前
 AnalogIn    RC(PC_5); // 右中
-AnalogIn    LC(PC_4); // 左中
+AnalogIn    LC(PC_4); // 左中、これメイン
 AnalogIn    RB(PC_2); // 右後
 AnalogIn    LB(PC_3); // 左後
 
 void        send(char add, char dat);
 void        getdata(void);
 void        sensor_reader(float*);
-void        autorun(float*);
+// void        autorun(float*);
+void        auto_run(float*);
 
 // デバッグ用関数
 void        debugger(float*);
@@ -52,9 +57,9 @@ int main(){
     float value[6];
 
     // 全エアシリをオンにする
-    air1.write(1);
-    air2.write(1);
-    air3.write(1);
+    air1.write(0);
+    air2.write(0);
+    air3.write(0);
     while (true) {
         getdata();
         sensor_reader(value);
@@ -102,7 +107,10 @@ int main(){
             send(HIDARI_USIRO,  SLW);
         }
         else if(maru){
-            autorun(value);
+            send(MIGI_MAE,      SLW);
+            send(HIDARI_MAE,    SLW);
+            send(MIGI_USIRO,    SLW);
+            send(HIDARI_USIRO,  SLW);
         }
         else{
             send(MIGI_MAE,      BRK);
@@ -144,46 +152,71 @@ void sensor_reader(float* value){
     value[3] = LC.read();
     value[4] = RB.read();
     value[5] = LB.read();
+
+    dis = 71.463 * pow(LC.read(),-1.084);
 }
 
-void autorun(float* value){
+// void autorun(float* value){
+//     while(!batu){
+//         getdata();
+
+//         // 前方ふたつが読み取っていた場合: 前輪持ち上げ
+//         if(value[0] >= WOOD || value[1] >= WOOD){
+//             air1 = 1;
+//         }
+
+//         // 中間ふたつ: 前輪下げ、中輪上げ 
+//         else if (value[2] >= WOOD || value[3] >= WOOD){
+//             if(air1.read() == 1){
+//                 air1.write(0);
+//                 air2.write(1);      
+//             }
+//         }
+
+//         // 後方ふたつ: 中輪下げ、後輪上げ下げ
+//         // センサー不足のため時間で対応、ここは要検討 //
+//         else if(value[4] >= WOOD || value[5] >= WOOD){
+//             if(air2.read() == 1){
+//                 air2 = 0;
+//                 air3 = 1;
+//                 ThisThread::sleep_for(1000ms);
+//                 air3 = 0;
+//             }
+//         }
+//         send(MIGI_MAE,      SLW);
+//         send(HIDARI_MAE,    SLW);
+//         send(MIGI_USIRO,    SLW);
+//         send(HIDARI_USIRO,  SLW);
+//     }
+// }
+
+void auto_run(float* value){
     while(!batu){
         getdata();
-
-        // 前方ふたつが読み取っていた場合: 前輪持ち上げ
-        if(value[0] >= WOOD || value[1] >= WOOD){
+        printf("///\nauto_running!!\n///\n");
+        sensor_reader(value);
+        debugger(value);
+        if(dis <= WOOD){
+            printf("エアシリ");
             air1 = 1;
+            ThisThread::sleep_for(1s);
+            air2 = 1;
+            ThisThread::sleep_for(1s);
+            air1 = 0;
+            ThisThread::sleep_for(100ms);
+            air3 = 1;
+            ThisThread::sleep_for(1s);
+            air2 = 0;
+            ThisThread::sleep_for(1s);
+            air3 = 0;
         }
-
-        // 中間ふたつ: 前輪下げ、中輪上げ 
-        else if (value[2] >= WOOD || value[3] >= WOOD){
-            if(air1.read() == 1){
-                air1.write(0);
-                air2.write(1);      
-            }
-        }
-
-        // 後方ふたつ: 中輪下げ、後輪上げ下げ
-        // センサー不足のため時間で対応、ここは要検討 //
-        else if(value[4] >= WOOD || value[5] >= WOOD){
-            if(air2.read() == 1){
-                air2 = 0;
-                air3 = 1;
-                ThisThread::sleep_for(1000ms);
-                air3 = 0;
-            }
-        }
-        send(MIGI_MAE,      SLW);
-        send(HIDARI_MAE,    SLW);
-        send(MIGI_USIRO,    SLW);
-        send(HIDARI_USIRO,  SLW);
     }
 }
 
 void debugger(float* value){
     // 赤外線センサーのデータ
-    printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
-
+    // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
+    printf("value: %lf\n",dis);
     // PS3コンのデータ 
     if(select)  printf("select,");
     if(start)   printf("start,");
@@ -203,6 +236,6 @@ void debugger(float* value){
     // 電源基板
     if(led.read() == 0)printf("12V:ON\n");
     else printf("12V:OFF\n");
-    printf("電源スイッチ:%d\n\n",sig.read());
+    printf("電源スイッチ:%d\n\n",!sig.read());
     printf("-------------------------\n\n");
 }
