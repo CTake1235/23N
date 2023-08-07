@@ -212,6 +212,9 @@ void auto_run(void){
             air3 = 0;
         }
     }
+    air1 = 0;
+    air2 = 0;
+    air3 = 0;
 }
 
 void debugger(void){
