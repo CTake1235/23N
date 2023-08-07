@@ -197,8 +197,6 @@ void auto_run(void){
     while(!batu){
         getdata();
         printf("///\nauto_running!!\n///\n");
-        sensor_reader();
-        debugger();
         if(dis <= WOOD){
             printf("エアシリ");
             air1 = 1;
