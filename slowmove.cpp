@@ -20,6 +20,7 @@ const char  BRK = 0x80;
 const char  SLW = 0x98;
 
 double      dis = 0;
+float value[6];
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -44,17 +45,16 @@ AnalogIn    LB(PC_3); // 左後
 
 void        send(char add, char dat);
 void        getdata(void);
-void        sensor_reader(float*);
-// void        autorun(float*);
-void        auto_run(float*);
+void        sensor_reader(void);
+// void        autorun(void);
+void        auto_run(void);
 
 // デバッグ用関数
-void        debugger(float*);
+void        debugger(void);
 bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
 
 int main(){
     sig = 0;
-    float value[6];
 
     // 全エアシリをオンにする
     air1.write(0);
@@ -62,8 +62,8 @@ int main(){
     air3.write(0);
     while (true) {
         getdata();
-        sensor_reader(value);
-        debugger(value);
+        sensor_reader();
+        debugger();
         if(select == 1){
             sig = 1;
         }
@@ -145,7 +145,7 @@ void getdata(void){
 
 }
 
-void sensor_reader(float* value){
+void sensor_reader(void){
     value[0] = RF.read();
     value[1] = LF.read();
     value[2] = RC.read();
@@ -156,7 +156,7 @@ void sensor_reader(float* value){
     dis = 71.463 * pow(LC.read(),-1.084);
 }
 
-// void autorun(float* value){
+// void autorun(void){
 //     while(!batu){
 //         getdata();
 
@@ -190,12 +190,12 @@ void sensor_reader(float* value){
 //     }
 // }
 
-void auto_run(float* value){
+void auto_run(void){
     while(!batu){
         getdata();
         printf("///\nauto_running!!\n///\n");
-        sensor_reader(value);
-        debugger(value);
+        sensor_reader();
+        debugger();
         if(dis <= WOOD){
             printf("エアシリ");
             air1 = 1;
@@ -213,7 +213,7 @@ void auto_run(float* value){
     }
 }
 
-void debugger(float* value){
+void debugger(void){
     // 赤外線センサーのデータ
     // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
     printf("value: %lf\n",dis);
