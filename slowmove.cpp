@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "PS3.h"
 #include "HMC5883L.h"
+#include <cstdio>
 
 // MDのアドレス
 #define MIGI_MAE        0x26
@@ -8,7 +9,7 @@
 #define MIGI_USIRO      0x56
 #define HIDARI_USIRO    0x50
 
-#define WOOD            80 // [cm]
+#define WOOD            77 // [cm]
 
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
@@ -54,10 +55,11 @@ void        auto_run(void);
 // デバッグ用関数
 void        debugger(void);
 bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
+bool state;
 
 int main(){
-    sig = 0;
-
+    sig = 1;
+    state = false;
     // 全エアシリをオンにする
     // 信号が来ないとき、足回りは展開されている
     air1.write(0);
@@ -66,6 +68,7 @@ int main(){
     while (true) {
         getdata();
         sensor_reader();
+        auto_run();
         debugger();
         if(select == 1){
             sig = 1;
@@ -110,11 +113,11 @@ int main(){
             send(HIDARI_USIRO,  SLW);
         }
         else if(maru){
+            state = true;
             send(MIGI_MAE,      SLW);
             send(HIDARI_MAE,    SLW);
             send(MIGI_USIRO,    SLW);
             send(HIDARI_USIRO,  SLW);
-            th1.start(auto_run);
         }
         else{
             send(MIGI_MAE,      BRK);
@@ -124,6 +127,7 @@ int main(){
         }
     }
 }
+
 void send(char add, char dat){
     motor.start();
     motor.write(add);
@@ -195,33 +199,34 @@ void sensor_reader(void){
 // }
 
 void auto_run(void){
-    while(!batu){
-        getdata();
+    while(state){
         // printf("///\nauto_running!!\n///\n");
+        getdata();
+        debugger();
+        sensor_reader();
+        if(batu)state = false;
         if(dis <= WOOD){
-            printf("エアシリ");
-            air1 = 1;
-            printf("前あげ");
-            ThisThread::sleep_for(1s);
-            air2 = 1;
-            printf("中あげ");
-            ThisThread::sleep_for(1s);
-            air1 = 0;
-            printf("前さげ");
-            ThisThread::sleep_for(100ms);
-            air3 = 1;
-            printf("後あげ");
-            ThisThread::sleep_for(1s);
-            air2 = 0;
-            printf("中さげ");
-            ThisThread::sleep_for(1s);
-            air3 = 0;
-            printf("後あげ");
+                printf("エアシリ\n");
+                air1 = 1;
+                printf("前あげ\n");
+                ThisThread::sleep_for(1s);
+                air2 = 1;
+                printf("中あげ\n");
+                ThisThread::sleep_for(1s);
+                air1 = 0;
+                printf("前さげ\n");
+                ThisThread::sleep_for(100ms);
+                air3 = 1;
+                printf("後あげ\n");
+                ThisThread::sleep_for(1s);
+                air2 = 0;
+                printf("中さげ\n");
+                ThisThread::sleep_for(1s);
+                air3 = 0;
+                printf("後あげ\n");
+                state = false;
         }
     }
-    air1 = 0;
-    air2 = 0;
-    air3 = 0;
 }
 
 void debugger(void){
