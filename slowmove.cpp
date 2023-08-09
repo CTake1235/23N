@@ -197,20 +197,26 @@ void sensor_reader(void){
 void auto_run(void){
     while(!batu){
         getdata();
-        printf("///\nauto_running!!\n///\n");
+        // printf("///\nauto_running!!\n///\n");
         if(dis <= WOOD){
             printf("エアシリ");
             air1 = 1;
+            printf("前あげ");
             ThisThread::sleep_for(1s);
             air2 = 1;
+            printf("中あげ");
             ThisThread::sleep_for(1s);
             air1 = 0;
+            printf("前さげ");
             ThisThread::sleep_for(100ms);
             air3 = 1;
+            printf("後あげ");
             ThisThread::sleep_for(1s);
             air2 = 0;
+            printf("中さげ");
             ThisThread::sleep_for(1s);
             air3 = 0;
+            printf("後あげ");
         }
     }
     air1 = 0;
