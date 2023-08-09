@@ -2,6 +2,7 @@
 #include "mbed.h"
 #include "PS3.h"
 #include "HMC5883L.h"
+#include <cstdio>
 
 // MDのアドレス
 #define MIGI_MAE        0x26
@@ -67,7 +68,7 @@ int main(){
     while (true) {
         getdata();
         sensor_reader();
-        debugger();
+        // debugger();
         if(select == 1){
             sig = 1;
         }
@@ -198,22 +199,30 @@ void sensor_reader(void){
 void auto_run(void){
     while(!batu){
         getdata();
-        printf("///\nauto_running!!\n///\n");
+        // printf("///\nauto_running!!\n///\n");
         if(dis <= WOOD){
-            printf("エアシリ");
+            printf("\n\n///エアシリ///\n\n");
             air1 = 1;
+            printf("前あげ\n");
             ThisThread::sleep_for(1s);
             air2 = 1;
+            printf("中あげ\n");
             ThisThread::sleep_for(1s);
             air1 = 0;
+            printf("前下げ\n");
             ThisThread::sleep_for(100ms);
             air3 = 1;
+            printf("後あげ\n");
             ThisThread::sleep_for(1s);
             air2 = 0;
+            printf("中下げ\n");
             ThisThread::sleep_for(1s);
             air3 = 0;
+            printf("後ろさげ\n");
+            break;
         }
     }
+    printf("おわり\n");
     air1 = 0;
     air2 = 0;
     air3 = 0;
