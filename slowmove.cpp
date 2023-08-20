@@ -9,7 +9,7 @@
 #define MIGI_USIRO      0x56
 #define HIDARI_USIRO    0x50
 
-#define WOOD            77 // [mm]
+#define WOOD            400 // [mm]
 
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
@@ -18,7 +18,7 @@
 const char  FWD = 0x98;
 const char  BCK = 0x62;
 const char  BRK = 0x80;
-const char  SLW = 0x98;
+const char  SLW = 0x98 + 8;
 
 double      dis = 0;
 float       value[6];
