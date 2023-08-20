@@ -54,7 +54,7 @@ void        auto_run(void);
 
 // デバッグ用関数
 void        debugger(void);
-bool ue,sita,migi,hidari,select,start,batu,maru,R1,L1;
+bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L2;
 bool state;
 
 int main(){
@@ -100,18 +100,26 @@ int main(){
             send(MIGI_USIRO,    BCK);
             send(HIDARI_USIRO,  FWD);
         }
-        else if(R1){
-            send(MIGI_MAE,      SLW);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    SLW);
-            send(HIDARI_USIRO,  FWD);
-        }
-        else if(L1){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    SLW);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  SLW);
-        }
+
+        // 前エアシリ下げ
+        else if(R2 && L2)       air1.write(1);
+
+        // 中エアシリ下げ
+        else if(R1 && L2)       air2.write(1);
+
+        // 後エアシリ下げ
+        else if(sankaku && L2)  air3.write(1);
+
+        // 前エアシリ上げ
+        else if(R2)             air1.write(0);
+
+        // 中エアシリ上げ
+        else if(R1)             air2.write(0);
+
+        // 後エアシリ上げ
+        else if(sankaku)        air3.write(0);
+
+        // 自動角材超え開始
         else if(maru){
             state = true;
             send(MIGI_MAE,      SLW);
@@ -145,9 +153,11 @@ void getdata(void){
     hidari  = ps3.getButtonState(PS3::hidari);
     migi    = ps3.getButtonState(PS3::migi);
 
+    R2      = ps3.getButtonState(PS3::R2);
     R1      = ps3.getButtonState(PS3::R1);
-    L1      = ps3.getButtonState(PS3::L1);
+    L2      = ps3.getButtonState(PS3::L2);
 
+    sankaku = ps3.getButtonState(PS3::sankaku);
     maru    = ps3.getButtonState(PS3::maru);
     batu    = ps3.getButtonState(PS3::batu);
 
