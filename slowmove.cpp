@@ -243,18 +243,6 @@ void debugger(void){
     // 赤外線センサーのデータ
     // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
     printf("value: %lf\n",dis);
-    // PS3コンのデータ 
-    if(select)  printf("select,");
-    if(start)   printf("start,");
-    if(ue)      printf("ue,");
-    if(hidari)  printf("hidari,");
-    if(sita)    printf("sita,");
-    if(migi)    printf("migi,");
-    if(R1)      printf("R1,");
-    if(L1)      printf("L1,");
-    if(maru)    printf("maru,");
-    if(batu)    printf("batu,");
-    printf("\n");
 
     // 地磁気センサーの値（見るだけ）
     printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
