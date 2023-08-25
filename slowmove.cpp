@@ -35,7 +35,7 @@ DigitalIn   led(PC_10);     //状態確認
 
 //エアシリンダーズ
 DigitalOut  air1(PA_12); // 前輪
-DigitalOut  air2(PA_11); // 中輪
+// DigitalOut  air2(PA_11); // 中輪 使わない
 DigitalOut  air3(PB_12); // 後輪
 
 //赤外線センサーズ
@@ -63,7 +63,7 @@ int main(){
     // 全エアシリをオンにする
     // 信号が来ないとき、足回りは展開されている
     air1.write(0);
-    air2.write(0);
+    // air2.write(0);
     air3.write(0);
     while (true) {
         getdata();
@@ -105,7 +105,7 @@ int main(){
         else if(R2 && L2)       air1.write(1);
 
         // 中エアシリ下げ
-        else if(R1 && L2)       air2.write(1);
+        // else if(R1 && L2)       air2.write(1);
 
         // 後エアシリ下げ
         else if(sankaku && L2)  air3.write(1);
@@ -114,7 +114,7 @@ int main(){
         else if(R2)             air1.write(0);
 
         // 中エアシリ上げ
-        else if(R1)             air2.write(0);
+        // else if(R1)             air2.write(0);
 
         // 後エアシリ上げ
         else if(sankaku)        air3.write(0);
@@ -187,14 +187,14 @@ void sensor_reader(void){
 //         else if (value[2] >= WOOD || value[3] >= WOOD){
 //             if(air1.read() == 1){
 //                 air1.write(0);
-//                 air2.write(1);      
+                // air2.write(1);      
 //             }
 //         }
 
 //         // 後方ふたつ: 中輪下げ、後輪上げ下げ
 //         // センサー不足のため時間で対応、ここは要検討 //
 //         else if(value[4] >= WOOD || value[5] >= WOOD){
-//             if(air2.read() == 1){
+//              if(air2.read() == 1){
 //                 air2 = 0;
 //                 air3 = 1;
 //                 ThisThread::sleep_for(1000ms);
@@ -220,20 +220,20 @@ void auto_run(void){
                 air1 = 1;
                 printf("前あげ\n");
                 ThisThread::sleep_for(1s);
-                air2 = 1;
-                printf("中あげ\n");
-                ThisThread::sleep_for(1s);
+                // air2 = 1;
+                // printf("中あげ\n");
+                // ThisThread::sleep_for(1s);
                 air1 = 0;
                 printf("前さげ\n");
                 ThisThread::sleep_for(100ms);
                 air3 = 1;
                 printf("後あげ\n");
                 ThisThread::sleep_for(1s);
-                air2 = 0;
-                printf("中さげ\n");
-                ThisThread::sleep_for(1s);
+                // air2 = 0;
+                // printf("中さげ\n");
+                // ThisThread::sleep_for(1s);
                 air3 = 0;
-                printf("後あげ\n");
+                printf("後さげ\n");
                 state = false;
         }
     }
