@@ -83,14 +83,14 @@ int main(){
         debugger();
 
         // やや右を向いてる
-        if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw <= 10){
+        if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw >= 10){
             motor_duty[0] = FWD + 8;
-            motor_duty[1] = FWD + 8;
+            motor_duty[2] = FWD + 8;
         }
 
         // やや左を向いてる
         else if(ChiJiKisensor.euler.yaw <= 350 && ChiJiKisensor.euler.yaw >= 270){
-            motor_duty[2] = FWD + 8;
+            motor_duty[1] = FWD + 8;
             motor_duty[3] = FWD + 8;
         }
 
