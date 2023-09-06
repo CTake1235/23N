@@ -14,9 +14,9 @@
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 // const char  FWD = 0xe0;
 // const char  BCK = 0x20;
-const char  FWD = 0xa8;
-const char  BCK = 0x52;
-const char  BRK = 0x80;
+const int  FWD = 0xa8;
+const int  BCK = 0x52;
+const int  BRK = 0x80;
 
 
 
@@ -45,10 +45,9 @@ AnalogIn    LC(PC_4); // 左中、これメイン
 AnalogIn    RB(PC_2); // 右後
 AnalogIn    LB(PC_3); // 左後
 
-void        send(char add, char dat);
+void        send(int,int);
 void        getdata(void);
 void        sensor_reader(void);
-// void        autorun(void);
 void        auto_run(void);
 void        stater(void);
 
@@ -167,7 +166,7 @@ int main(){
     }
 }
 
-void send(char add, char dat){
+void send(int add, int dat){
     motor.start();
     motor.write(add);
     motor.write(dat);
