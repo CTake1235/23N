@@ -32,7 +32,6 @@ DigitalIn   led(PC_10);     //状態確認
 
 //エアシリンダーズ
 DigitalOut  air1(PA_12); // 前輪
-// DigitalOut  air2(PA_11); // 中輪 使わない
 DigitalOut  air3(PB_12); // 後輪
 
 DigitalOut  myled(LED1);
