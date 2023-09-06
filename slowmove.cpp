@@ -175,40 +175,6 @@ void sensor_reader(void){
     dis = 71.463 * pow(LC.read(),-1.084);
 }
 
-// void autorun(void){
-//     while(!batu){
-//         getdata();
-
-//         // 前方ふたつが読み取っていた場合: 前輪持ち上げ
-//         if(value[0] >= WOOD || value[1] >= WOOD){
-//             air1 = 1;
-//         }
-
-//         // 中間ふたつ: 前輪下げ、中輪上げ 
-//         else if (value[2] >= WOOD || value[3] >= WOOD){
-//             if(air1.read() == 1){
-//                 air1.write(0);
-                // air2.write(1);      
-//             }
-//         }
-
-//         // 後方ふたつ: 中輪下げ、後輪上げ下げ
-//         // センサー不足のため時間で対応、ここは要検討 //
-//         else if(value[4] >= WOOD || value[5] >= WOOD){
-//              if(air2.read() == 1){
-//                 air2 = 0;
-//                 air3 = 1;
-//                 ThisThread::sleep_for(1000ms);
-//                 air3 = 0;
-//             }
-//         }
-//         send(MIGI_MAE,      SLW);
-//         send(HIDARI_MAE,    SLW);
-//         send(MIGI_USIRO,    SLW);
-//         send(HIDARI_USIRO,  SLW);
-//     }
-// }
-
 void auto_run(void){
     while(state){
         getter.attach(Callback<void()>(&stater),1ms);
