@@ -11,7 +11,6 @@
 
 #define WOOD            90 // [mm]
 
-
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 // const char  FWD = 0xe0;
 // const char  BCK = 0x20;
