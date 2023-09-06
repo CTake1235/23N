@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include "PS3.h"
-#include "HMC5883L.h"
+#include "BNO055.h"
 #include <cstdio>
 
 // MDのアドレス
@@ -19,14 +19,13 @@ const char  BCK = 0x62 - 16;
 const char  BRK = 0x80;
 const char  SLW = 0x98 + 16;
 
-double      dis = 0;
-float       value[6];
+
 
 Ticker      getter;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
-HMC5883L    ChiJiKisensor(PB_4,PA_8);
+BNO055      ChiJiKisensor(PB_4,PA_8);
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
@@ -36,6 +35,8 @@ DigitalIn   led(PC_10);     //状態確認
 DigitalOut  air1(PA_12); // 前輪
 // DigitalOut  air2(PA_11); // 中輪 使わない
 DigitalOut  air3(PB_12); // 後輪
+
+DigitalOut  myled(LED1);
 
 //赤外線センサーズ
 AnalogIn    RF(PA_6); // 右前
@@ -57,6 +58,9 @@ void        debugger(void);
 bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L2;
 bool state;
 
+double      dis = 0;
+float       value[6];
+
 int main(){
     sig = 1;
     state = false;
@@ -65,11 +69,32 @@ int main(){
     air1.write(0);
     // air2.write(0);
     air3.write(0);
+    myled.write(0);
+
+    char r_fwd = FWD;
+    char r_bck = BCK;
+
+    // 地磁気センサー初期化、見つかるまでLチカ
+    ChiJiKisensor.reset();
+    while(!ChiJiKisensor.check())myled.write(!myled.read());
+    myled.write(1); // 見つかったら光らっせぱにしておく
     while (true) {
         getdata();
         sensor_reader();
         auto_run();
         debugger();
+        if(ChiJiKisensor.euler.yaw <= 350 && ChiJiKisensor.euler.yaw >= 270){
+            r_fwd = FWD + // 上げたい分
+            r_bck = BCK - 
+        }
+        else if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw <= 10){
+            r_fwd = FWD + 
+            r_bck = BCK - 
+        }
+        else{
+            r_fwd = FWD;
+            r_bck = BCK;
+        }
         if(select == 1){
             sig = 1;
         }
@@ -164,14 +189,19 @@ void getdata(void){
 }
 
 void sensor_reader(void){
+
+    // 測距
     value[0] = RF.read();
     value[1] = LF.read();
     value[2] = RC.read();
     value[3] = LC.read();
     value[4] = RB.read();
     value[5] = LB.read();
-
     dis = 71.463 * pow(LC.read(),-1.084);
+
+    // 地磁気
+    ChiJiKisensor.get_angles();
+
 }
 
 void auto_run(void){
@@ -217,8 +247,7 @@ void debugger(void){
     // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
     printf("value: %lf\n",dis);
 
-    // 地磁気センサーの値（見るだけ）
-    printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
+    ChiJiKisensor.get_angles();
 
     // 電源基板
     if(led.read() == 0)printf("12V:ON\n");
