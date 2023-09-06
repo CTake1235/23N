@@ -23,7 +23,7 @@ const char  SLW = 0x98 + 16;
 double      dis = 0;
 float       value[6];
 
-Thread      th1;
+Ticker      getter;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -51,6 +51,7 @@ void        getdata(void);
 void        sensor_reader(void);
 // void        autorun(void);
 void        auto_run(void);
+void        stater(void);
 
 // デバッグ用関数
 void        debugger(void);
@@ -209,12 +210,8 @@ void sensor_reader(void){
 // }
 
 void auto_run(void){
-    while(state && !batu){
-        // printf("///\nauto_running!!\n///\n");
-        getdata();
-        debugger();
-        sensor_reader();
-        if(batu)state = false;
+    while(state){
+        getter.attach(Callback<void()>(&stater),1ms);
         if(dis <= WOOD){
                 printf("エアシリ\n");
                 air1 = 1;
@@ -235,7 +232,18 @@ void auto_run(void){
                 air3 = 0;
                 printf("後さげ\n");
                 state = false;
+                getter.detach();
         }
+    }
+}
+
+void stater(void){
+    getdata();
+    if(batu){
+        state = false;
+    }
+    else{
+        printf("running!\n");
     }
 }
 
