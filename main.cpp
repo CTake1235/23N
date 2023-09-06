@@ -14,10 +14,9 @@
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 // const char  FWD = 0xe0;
 // const char  BCK = 0x20;
-const char  FWD = 0x98 + 16;
-const char  BCK = 0x62 - 16;
+const char  FWD = 0xa8;
+const char  BCK = 0x52;
 const char  BRK = 0x80;
-const char  SLW = 0x98 + 16;
 
 
 
@@ -71,8 +70,8 @@ int main(){
     air3.write(0);
     myled.write(0);
 
-    char r_fwd = FWD;
-    char r_bck = BCK;
+    // 0:右前 1:左前 2:右後 3:左後
+    char motor_duty[4] = {FWD,FWD,FWD,FWD};
 
     // 地磁気センサー初期化、見つかるまでLチカ
     ChiJiKisensor.reset();
@@ -83,17 +82,24 @@ int main(){
         sensor_reader();
         auto_run();
         debugger();
-        if(ChiJiKisensor.euler.yaw <= 350 && ChiJiKisensor.euler.yaw >= 270){
-            r_fwd = FWD + // 上げたい分
-            r_bck = BCK - 
+
+        // やや右を向いてる
+        if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw <= 10){
+            motor_duty[0] += 8;
+            motor_duty[1] += 8;
         }
-        else if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw <= 10){
-            r_fwd = FWD + 
-            r_bck = BCK - 
+
+        // やや左を向いてる
+        else if(ChiJiKisensor.euler.yaw <= 350 && ChiJiKisensor.euler.yaw >= 270){
+            motor_duty[2] += 8;
+            motor_duty[3] += 8;
         }
+
+        // わりと正面やな
         else{
-            r_fwd = FWD;
-            r_bck = BCK;
+            for(int i = 0; i <= 3; i++){
+                motor_duty[i] = FWD;
+            }
         }
         if(select == 1){
             sig = 1;
