@@ -122,10 +122,10 @@ int main(){
         // 自動角材超え開始
         else if(maru){
             state = true;
-            send(MIGI_MAE,      SLW);
-            send(HIDARI_MAE,    SLW);
-            send(MIGI_USIRO,    SLW);
-            send(HIDARI_USIRO,  SLW);
+            send(MIGI_MAE,      FWD);
+            send(HIDARI_MAE,    FWD);
+            send(MIGI_USIRO,    FWD);
+            send(HIDARI_USIRO,  FWD);
         }
         else{
             send(MIGI_MAE,      BRK);
@@ -209,7 +209,7 @@ void sensor_reader(void){
 // }
 
 void auto_run(void){
-    while(state){
+    while(state && !batu){
         // printf("///\nauto_running!!\n///\n");
         getdata();
         debugger();
