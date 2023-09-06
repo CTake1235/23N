@@ -15,7 +15,7 @@
 // const char  FWD = 0xe0;
 // const char  BCK = 0x20;
 const int  FWD = 0xa8;
-const int  BCK = 0x52;
+const int  BCK = 0xff - FWD;
 const int  BRK = 0x80;
 
 
@@ -53,7 +53,7 @@ void        stater(void);
 
 // デバッグ用関数
 void        debugger(void);
-bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L2;
+bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L1,L2;
 bool state;
 
 double      dis = 0;
@@ -131,11 +131,22 @@ int main(){
             send(HIDARI_USIRO,  FWD);
         }
 
-        // 前エアシリ下げ
-        else if(R2 && L2)       air1.write(1);
+        else if(R1){
+            send(MIGI_MAE,      BCK);
+            send(HIDARI_MAE,    FWD);
+            send(MIGI_USIRO,    BCK);
+            send(HIDARI_USIRO,  FWD);
+        }
 
-        // 中エアシリ下げ
-        // else if(R1 && L2)       air2.write(1);
+        else if(L1){
+            send(MIGI_MAE,      FWD);
+            send(HIDARI_MAE,    BCK);
+            send(MIGI_USIRO,    FWD);
+            send(HIDARI_USIRO,  BCK);
+        }
+
+        // 前エアシリ下げ
+        else if(sankaku && R2)  air1.write(1);
 
         // 後エアシリ下げ
         else if(sankaku && L2)  air3.write(1);
@@ -143,11 +154,8 @@ int main(){
         // 前エアシリ上げ
         else if(R2)             air1.write(0);
 
-        // 中エアシリ上げ
-        // else if(R1)             air2.write(0);
-
         // 後エアシリ上げ
-        else if(sankaku)        air3.write(0);
+        else if(L2)             air3.write(0);
 
         // 自動角材超え開始
         else if(maru){
@@ -185,6 +193,7 @@ void getdata(void){
 
     R2      = ps3.getButtonState(PS3::R2);
     R1      = ps3.getButtonState(PS3::R1);
+    L1      = ps3.getButtonState(PS3::L1);
     L2      = ps3.getButtonState(PS3::L2);
 
     sankaku = ps3.getButtonState(PS3::sankaku);
