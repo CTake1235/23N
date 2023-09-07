@@ -155,7 +155,7 @@ void getdata(void){
 
     R2      = ps3.getButtonState(PS3::R2);
     R1      = ps3.getButtonState(PS3::R1);
-    L1      = ps3.getButtonState(PS3::L1)
+    L1      = ps3.getButtonState(PS3::L1);
     L2      = ps3.getButtonState(PS3::L2);
 
     sankaku = ps3.getButtonState(PS3::sankaku);
