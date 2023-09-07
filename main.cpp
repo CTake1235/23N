@@ -64,8 +64,8 @@ int main(){
     air1.write(0);
     // air2.write(0);
     air3.write(0);
+    getter.attach(&getdata,1ms);
     while (true) {
-        getdata();
         sensor_reader();
         auto_run();
         debugger();
@@ -190,43 +190,38 @@ void sensor_reader(void){
 
 void auto_run(void){
     while(state){
-        getter.attach(Callback<void()>(&stater),1ms);
         sensor_reader();
         debugger();
         if(dis <= WOOD){
-            int counter = 0;
             printf("エアシリ\n");
-            while(counter <= 3 && state){
+            for(int counter = 0;counter < 4;counter++){
+                if(!state)break;
                 switch (counter) {
-                case 0:
-                    air1 = 1;
-                    printf("前あげ\n");
-                    ThisThread::sleep_for(1s);
-                    break;
-                case 1:
-                    air1 = 0;
-                    printf("前さげ\n");
-                    ThisThread::sleep_for(100ms);
-                    break;
-                case 2:
-                    air3 = 1;
-                    printf("後あげ\n");
-                    ThisThread::sleep_for(1s);
-                    break;
-                case 3:
-                    air3 = 0;
-                    printf("後さげ\n");
-                    break;
+                    case 0:
+                        air1 = 1;
+                        printf("前あげ\n");
+                        ThisThread::sleep_for(1s);
+                        break;
+                    case 1:
+                        air1 = 0;
+                        printf("前さげ\n");
+                        ThisThread::sleep_for(100ms);
+                        break;
+                    case 2:
+                        air3 = 1;
+                        printf("後あげ\n");
+                        ThisThread::sleep_for(1s);
+                        break;
+                    case 3:
+                        air3 = 0;
+                        printf("後さげ\n");
+                        break;
                 }
-                counter++;
             }
             state = false;
-            getter.detach();
-            counter = 0;
         }
     }
 }
-
 void stater(void){
     getdata();
     if(batu){
