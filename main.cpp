@@ -17,7 +17,6 @@
 const char  FWD = 0x98 + 16;
 const char  BCK = 0x62 - 16;
 const char  BRK = 0x80;
-const char  SLW = 0x98 + 16;
 
 double      dis = 0;
 float       value[6];
@@ -99,6 +98,20 @@ int main(){
             send(HIDARI_MAE,    BCK);
             send(MIGI_USIRO,    BCK);
             send(HIDARI_USIRO,  FWD);
+        }
+
+        else if(R1){
+            send(MIGI_MAE,      BCK + 16);
+            send(HIDARI_MAE,    FWD - 16);
+            send(MIGI_USIRO,    BCK + 16);
+            send(HIDARI_USIRO,  FWD - 16);
+        }
+
+        else if(L1){
+            send(MIGI_MAE,      FWD - 16);
+            send(HIDARI_MAE,    BCK + 16);
+            send(MIGI_USIRO,    FWD - 16);
+            send(HIDARI_USIRO,  BCK + 16);
         }
 
         // 前エアシリ下げ
