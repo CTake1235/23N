@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include "PS3.h"
-#include "HMC5883L.h"
+// #include "HMC5883L.h"
 #include <cstdio>
 
 // MDのアドレス
@@ -26,7 +26,7 @@ Ticker      getter;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
-HMC5883L    ChiJiKisensor(PB_4,PA_8);
+// HMC5883L    ChiJiKisensor(PB_4,PA_8);
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
@@ -54,7 +54,7 @@ void        stater(void);
 
 // デバッグ用関数
 void        debugger(void);
-bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L2;
+bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L1,L2;
 bool state;
 
 int main(){
@@ -102,7 +102,7 @@ int main(){
         }
 
         // 前エアシリ下げ
-        else if(R2 && L2)       air1.write(1);
+        else if(sankaku && R2)  air1.write(1);
 
         // 中エアシリ下げ
         // else if(R1 && L2)       air2.write(1);
@@ -117,7 +117,7 @@ int main(){
         // else if(R1)             air2.write(0);
 
         // 後エアシリ上げ
-        else if(sankaku)        air3.write(0);
+        else if(L2)             air3.write(0);
 
         // 自動角材超え開始
         else if(maru){
@@ -155,6 +155,7 @@ void getdata(void){
 
     R2      = ps3.getButtonState(PS3::R2);
     R1      = ps3.getButtonState(PS3::R1);
+    L1      = ps3.getButtonState(PS3::L1)
     L2      = ps3.getButtonState(PS3::L2);
 
     sankaku = ps3.getButtonState(PS3::sankaku);
@@ -218,7 +219,7 @@ void debugger(void){
     printf("value: %lf\n",dis);
 
     // 地磁気センサーの値（見るだけ）
-    printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
+    // printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
 
     // 電源基板
     if(led.read() == 0)printf("12V:ON\n");
