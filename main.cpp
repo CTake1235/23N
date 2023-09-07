@@ -18,10 +18,11 @@ const char  FWD = 0x98 + 16;
 const char  BCK = 0x62 - 16;
 const char  BRK = 0x80;
 
-double      dis = 0;
-float       value[6];
+double      dis[2] = {};
+float       value[2];
 
 Ticker      getter;
+Ticker      runner;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -32,17 +33,12 @@ DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
 DigitalIn   led(PC_10);     //状態確認
 
 //エアシリンダーズ
-DigitalOut  air1(PA_12); // 前輪
-// DigitalOut  air2(PA_11); // 中輪 使わない
-DigitalOut  air3(PB_12); // 後輪
+DigitalOut  airF(PA_12); // 前輪
+DigitalOut  airB(PB_12); // 後輪
 
 //赤外線センサーズ
-AnalogIn    RF(PA_6); // 右前
-AnalogIn    LF(PA_7); // 左前
-AnalogIn    RC(PC_5); // 右中
-AnalogIn    LC(PC_4); // 左中、これメイン
-AnalogIn    RB(PC_2); // 右後
-AnalogIn    LB(PC_3); // 左後
+AnalogIn    sensorB(PC_5); // 右中
+AnalogIn    sensorF(PC_4); // 左中、これメイン
 
 void        send(char add, char dat);
 void        getdata(void);
@@ -61,14 +57,18 @@ int main(){
     state = false;
     // 全エアシリをオンにする
     // 信号が来ないとき、足回りは展開されている
-    air1.write(0);
-    // air2.write(0);
-    air3.write(0);
-    getter.attach(&getdata,1ms);
+    airF.write(0);
+    airB.write(0);
+
+    getter.attach(&getdata,1ms); // こっちは1msごとに必ず割り込む
+    // ps3.myattach(); // こっちだと受信したときに割り込む
+
+    runner.attach(&auto_run,30ms);
+
     while (true) {
-        sensor_reader();
-        auto_run();
+
         debugger();
+        
         if(select == 1){
             sig = 1;
         }
@@ -115,22 +115,22 @@ int main(){
         }
 
         // 前エアシリ下げ
-        else if(sankaku && R2)  air1.write(1);
+        else if(sankaku && R2)  airF.write(1);
 
         // 中エアシリ下げ
         // else if(R1 && L2)       air2.write(1);
 
         // 後エアシリ下げ
-        else if(sankaku && L2)  air3.write(1);
+        else if(sankaku && L2)  airB.write(1);
 
         // 前エアシリ上げ
-        else if(R2)             air1.write(0);
+        else if(R2)             airF.write(0);
 
         // 中エアシリ上げ
         // else if(R1)             air2.write(0);
 
         // 後エアシリ上げ
-        else if(L2)             air3.write(0);
+        else if(L2)             airB.write(0);
 
         // 自動角材超え開始
         else if(maru){
@@ -178,48 +178,53 @@ void getdata(void){
 }
 
 void sensor_reader(void){
-    value[0] = RF.read();
-    value[1] = LF.read();
-    value[2] = RC.read();
-    value[3] = LC.read();
-    value[4] = RB.read();
-    value[5] = LB.read();
-
-    dis = 71.463 * pow(LC.read(),-1.084);
+    value[0] = sensorF.read();
+    value[1] = sensorB.read();
+    for(int i = 0; i < 2; i++){
+        dis[i] = 71.463 * pow(value[i],-1.084);
+    }
 }
 
 void auto_run(void){
     while(state){
+
+        // ここでもgetdataがちゃんとattachしてるかチェック
+        printf("%d\n",batu);
+
         sensor_reader();
         debugger();
-        if(dis <= WOOD){
-            printf("エアシリ\n");
-            for(int counter = 0;counter < 4;counter++){
-                if(!state)break;
-                switch (counter) {
-                    case 0:
-                        air1 = 1;
-                        printf("前あげ\n");
-                        ThisThread::sleep_for(1s);
-                        break;
-                    case 1:
-                        air1 = 0;
-                        printf("前さげ\n");
-                        ThisThread::sleep_for(100ms);
-                        break;
-                    case 2:
-                        air3 = 1;
-                        printf("後あげ\n");
-                        ThisThread::sleep_for(1s);
-                        break;
-                    case 3:
-                        air3 = 0;
-                        printf("後さげ\n");
-                        break;
-                }
-            }
-            state = false;
+        if(dis[0] <= WOOD){
+            airF.write(1); // 前あげ
         }
+        else if(dis[1] <= WOOD){
+            airF.write(0);
+            ThisThread::sleep_for(10ms);
+            airB.write(1);
+        }
+            // for(int counter = 0;counter < 4;counter++){
+            //     if(!state)break;
+            //     switch (counter) {
+            //         case 0:
+            //             airF = 1;
+            //             printf("前あげ\n");
+            //             ThisThread::sleep_for(1s);
+            //             break;
+            //         case 1:
+            //             airF = 0;
+            //             printf("前さげ\n");
+            //             ThisThread::sleep_for(100ms);
+            //             break;
+            //         case 2:
+            //             airB = 1;
+            //             printf("後あげ\n");
+            //             ThisThread::sleep_for(1s);
+            //             break;
+            //         case 3:
+            //             airB = 0;
+            //             printf("後さげ\n");
+            //             break;
+            //     }
+        state = false;
     }
 }
 void stater(void){
@@ -235,7 +240,7 @@ void stater(void){
 void debugger(void){
     // 赤外線センサーのデータ
     // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
-    printf("value: %lf\n",dis);
+    printf("sensorF: %lf\nsensorB:%lf\n",dis[0],dis[1]);
 
     // 地磁気センサーの値（見るだけ）
     // printf("角度:\t%f\n",ChiJiKisensor.getHeadingXYDeg());
