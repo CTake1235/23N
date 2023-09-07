@@ -9,7 +9,7 @@
 #define MIGI_USIRO      0x56
 #define HIDARI_USIRO    0x50
 
-#define WOOD            100 // [mm]
+#define WOOD            90 // [mm]
 
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 // const char  FWD = 0xe0;
@@ -191,38 +191,27 @@ void sensor_reader(void){
 void auto_run(void){
     while(state){
         getter.attach(Callback<void()>(&stater),1ms);
-        sensor_reader();
-        debugger();
         if(dis <= WOOD){
-            int counter = 0;
-            printf("エアシリ\n");
-            while(counter <= 3 && state){
-                switch (counter) {
-                case 0:
-                    air1 = 1;
-                    printf("前あげ\n");
-                    ThisThread::sleep_for(1s);
-                    break;
-                case 1:
-                    air1 = 0;
-                    printf("前さげ\n");
-                    ThisThread::sleep_for(100ms);
-                    break;
-                case 2:
-                    air3 = 1;
-                    printf("後あげ\n");
-                    ThisThread::sleep_for(1s);
-                    break;
-                case 3:
-                    air3 = 0;
-                    printf("後さげ\n");
-                    break;
-                }
-                counter++;
-            }
-            state = false;
-            getter.detach();
-            counter = 0;
+                printf("エアシリ\n");
+                air1 = 1;
+                printf("前あげ\n");
+                ThisThread::sleep_for(1s);
+                // air2 = 1;
+                // printf("中あげ\n");
+                // ThisThread::sleep_for(1s);
+                air1 = 0;
+                printf("前さげ\n");
+                ThisThread::sleep_for(100ms);
+                air3 = 1;
+                printf("後あげ\n");
+                ThisThread::sleep_for(1s);
+                // air2 = 0;
+                // printf("中さげ\n");
+                // ThisThread::sleep_for(1s);
+                air3 = 0;
+                printf("後さげ\n");
+                state = false;
+                getter.detach();
         }
     }
 }
