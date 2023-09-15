@@ -1,7 +1,7 @@
 #include "mbed.h"
-#include "PS3.h"
-// #include "HMC5883L.h"
 #include <cstdio>
+#include <string>
+#include <map>
 
 // MDのアドレス
 #define MIGI_MAE        0x26
@@ -24,9 +24,13 @@ float       value[2];
 Ticker      getter;
 Ticker      runner;
 
-PS3         ps3(D8,D2);     //PA_9,PA_10
-I2C         motor(D14,D15); //PB_9, PB_8
-// HMC5883L    ChiJiKisensor(PB_4,PA_8);
+// PCからのシリアル
+UnbufferedSerial pc(A0,A1);
+
+// MDの信号
+I2C			motor(D14,D15); //PB_9, PB_8
+
+
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
@@ -37,115 +41,141 @@ DigitalOut  airF(PA_12); // 前輪
 DigitalOut  airB(PB_12); // 後輪
 
 //赤外線センサーズ
-AnalogIn    sensorB(PC_5); // 右中
-AnalogIn    sensorF(PC_4); // 左中、これメイン
+AnalogIn    sensorF(PC_4); // まえ
+AnalogIn    sensorB(PC_5); // うしろ
 
 void        send(char add, char dat);
-void        getdata(void);
+void        initMap(void);
 void        sensor_reader(void);
-// void        autorun(void);
 void        auto_run(void);
-void        stater(void);
 
 // デバッグ用関数
 void        debugger(void);
-bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L1,L2;
 bool state;
 
+static enum	commands{
+	com_NotDefined,
+	// 以後要変更
+	command1,
+	command2,
+};
+static std::map<std::string, commands> MapofCommands;
+
+static enum options{
+	opt_NotDefined,
+	// 以後
+	options1,
+};
+static std::map<std::string, options> MapofOptions;
+
+
 int main(){
+    char CommandBuf[64];
+	char OptionBuf[64];
+	char ValueBuf[64];
+
+	// 電源基板オフ
     sig = 1;
+
+	// 自動足上下オフ
     state = false;
-    // 全エアシリをオンにする
-    // 信号が来ないとき、足回りは展開されている
+
+    // 全エアシリを押し下げ
+    // 信号が来ないとき、足回りは押し下げられる
     airF.write(0);
     airB.write(0);
 
-    getter.attach(&getdata,1ms); // こっちは1msごとに必ず割り込む
-    // ps3.myattach(); // こっちだと受信したときに割り込む
-
+	// 自動足上下コマンドの割り込み開始
     runner.attach(&auto_run,30ms);
 
     while (true) {
 
         debugger();
-        
-        if(select == 1){
-            sig = 1;
-        }
-        else if(start == 1){
-            sig = 0;
-        }
-        else if(ue){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  FWD);
-        }
-        else if(sita){
-            send(MIGI_MAE,      BCK);
-            send(HIDARI_MAE,    BCK);
-            send(MIGI_USIRO,    BCK);
-            send(HIDARI_USIRO,  BCK);
-        }
-        else if(migi){
-            send(MIGI_MAE,      BCK);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  BCK);
-        }
-        else if(hidari){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    BCK);
-            send(MIGI_USIRO,    BCK);
-            send(HIDARI_USIRO,  FWD);
-        }
+        switch(MapofCommands[CommandBuf]){
+		case command1:
+			switch(MapofOptions[OptionBuf]){
+				case options1:
+					break;
+			}
+        // if(select == 1){
+        //     sig = 1;
+        // }
 
-        else if(R1){
-            send(MIGI_MAE,      BCK + 16);
-            send(HIDARI_MAE,    FWD - 16);
-            send(MIGI_USIRO,    BCK + 16);
-            send(HIDARI_USIRO,  FWD - 16);
-        }
+        // else if(start == 1){
+        //     sig = 0;
+        // }
+        // else if(ue){
+        //     send(MIGI_MAE,      FWD);
+        //     send(HIDARI_MAE,    FWD);
+        //     send(MIGI_USIRO,    FWD);
+        //     send(HIDARI_USIRO,  FWD);
+        // }
+        // else if(sita){
+        //     send(MIGI_MAE,      BCK);
+        //     send(HIDARI_MAE,    BCK);
+        //     send(MIGI_USIRO,    BCK);
+        //     send(HIDARI_USIRO,  BCK);
+        // }
+        // else if(migi){
+        //     send(MIGI_MAE,      BCK);
+        //     send(HIDARI_MAE,    FWD);
+        //     send(MIGI_USIRO,    FWD);
+        //     send(HIDARI_USIRO,  BCK);
+        // }
+        // else if(hidari){
+        //     send(MIGI_MAE,      FWD);
+        //     send(HIDARI_MAE,    BCK);
+        //     send(MIGI_USIRO,    BCK);
+        //     send(HIDARI_USIRO,  FWD);
+        // }
 
-        else if(L1){
-            send(MIGI_MAE,      FWD - 16);
-            send(HIDARI_MAE,    BCK + 16);
-            send(MIGI_USIRO,    FWD - 16);
-            send(HIDARI_USIRO,  BCK + 16);
-        }
+        // else if(R1){
+        //     send(MIGI_MAE,      BCK + 16);
+        //     send(HIDARI_MAE,    FWD - 16);
+        //     send(MIGI_USIRO,    BCK + 16);
+        //     send(HIDARI_USIRO,  FWD - 16);
+        // }
 
-        // 前エアシリ下げ
-        else if(sankaku && R2)  airF.write(1);
+        // else if(L1){
+        //     send(MIGI_MAE,      FWD - 16);
+        //     send(HIDARI_MAE,    BCK + 16);
+        //     send(MIGI_USIRO,    FWD - 16);
+        //     send(HIDARI_USIRO,  BCK + 16);
+        // }
 
-        // 中エアシリ下げ
-        // else if(R1 && L2)       air2.write(1);
+        // // 前エアシリ下げ
+        // else if(sankaku && R2)  airF.write(1);
 
-        // 後エアシリ下げ
-        else if(sankaku && L2)  airB.write(1);
+        // // 中エアシリ下げ
+        // // else if(R1 && L2)       air2.write(1);
 
-        // 前エアシリ上げ
-        else if(R2)             airF.write(0);
+        // // 後エアシリ下げ
+        // else if(sankaku && L2)  airB.write(1);
 
-        // 中エアシリ上げ
-        // else if(R1)             air2.write(0);
+        // // 前エアシリ上げ
+        // else if(R2)             airF.write(0);
 
-        // 後エアシリ上げ
-        else if(L2)             airB.write(0);
+        // // 中エアシリ上げ
+        // // else if(R1)             air2.write(0);
 
-        // 自動角材超え開始
-        else if(maru){
-            state = true;
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  FWD);
-        }
-        else{
-            send(MIGI_MAE,      BRK);
-            send(HIDARI_MAE,    BRK);
-            send(MIGI_USIRO,    BRK);
-            send(HIDARI_USIRO,  BRK);
-        }
+        // // 後エアシリ上げ
+        // else if(L2)             airB.write(0);
+
+        // // 自動角材超え開始
+        // else if(maru){
+        //     state = true;
+        //     send(MIGI_MAE,      FWD);
+        //     send(HIDARI_MAE,    FWD);
+        //     send(MIGI_USIRO,    FWD);
+        //     send(HIDARI_USIRO,  FWD);
+        // }
+        // else{
+        //     send(MIGI_MAE,      BRK);
+        //     send(HIDARI_MAE,    BRK);
+        //     send(MIGI_USIRO,    BRK);
+        //     send(HIDARI_USIRO,  BRK);
+        // }
+		}
     }
 }
 
@@ -157,24 +187,8 @@ void send(char add, char dat){
     wait_us(50000);
 }
 
-void getdata(void){
-    select  = ps3.getSELECTState();
-    start   = ps3.getSTARTState();
-
-    ue      = ps3.getButtonState(PS3::ue);
-    sita    = ps3.getButtonState(PS3::sita);
-    hidari  = ps3.getButtonState(PS3::hidari);
-    migi    = ps3.getButtonState(PS3::migi);
-
-    R2      = ps3.getButtonState(PS3::R2);
-    R1      = ps3.getButtonState(PS3::R1);
-    L1      = ps3.getButtonState(PS3::L1);
-    L2      = ps3.getButtonState(PS3::L2);
-
-    sankaku = ps3.getButtonState(PS3::sankaku);
-    maru    = ps3.getButtonState(PS3::maru);
-    batu    = ps3.getButtonState(PS3::batu);
-
+void initMap(void){
+	MapofCommands["ue"] = command1;
 }
 
 void sensor_reader(void){
@@ -187,9 +201,6 @@ void sensor_reader(void){
 
 void auto_run(void){
     while(state){
-
-        // ここでもgetdataがちゃんとattachしてるかチェック
-        printf("%d\n",batu);
 
         sensor_reader();
         debugger();
@@ -225,15 +236,6 @@ void auto_run(void){
             //             break;
             //     }
         state = false;
-    }
-}
-void stater(void){
-    getdata();
-    if(batu){
-        state = false;
-    }
-    else{
-        printf("running!\n");
     }
 }
 
