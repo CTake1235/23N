@@ -22,6 +22,7 @@ double      dis = 0;
 float       value[6];
 
 Ticker      getter;
+Ticker      reader;
 
 PS3         ps3(D8,D2);     //PA_9,PA_10
 I2C         motor(D14,D15); //PB_9, PB_8
@@ -64,8 +65,11 @@ int main(){
     air1.write(0);
     // air2.write(0);
     air3.write(0);
+
+    getter.attach(&getdata,10ms);
+    // reader.attach(&sensor_reader, 10ms);
     while (true) {
-        getdata();
+        // getdata();
         sensor_reader();
         auto_run();
         debugger();
@@ -190,39 +194,36 @@ void sensor_reader(void){
 
 void auto_run(void){
     while(state){
-        getter.attach(Callback<void()>(&stater),1ms);
+        debugger();
+        sensor_reader();
         if(dis <= WOOD){
-                printf("エアシリ\n");
-                air1 = 1;
-                printf("前あげ\n");
-                ThisThread::sleep_for(1s);
-                // air2 = 1;
-                // printf("中あげ\n");
-                // ThisThread::sleep_for(1s);
-                air1 = 0;
-                printf("前さげ\n");
-                ThisThread::sleep_for(100ms);
-                air3 = 1;
-                printf("後あげ\n");
-                ThisThread::sleep_for(1s);
-                // air2 = 0;
-                // printf("中さげ\n");
-                // ThisThread::sleep_for(1s);
-                air3 = 0;
-                printf("後さげ\n");
-                state = false;
-                getter.detach();
+            printf("エアシリ\n");
+            air1 = 1;
+            printf("前あげ\n");
+            ThisThread::sleep_for(1s);
+            // air2 = 1;
+            // printf("中あげ\n");
+            // ThisThread::sleep_for(1s);
+            air1 = 0;
+            printf("前さげ\n");
+            ThisThread::sleep_for(100ms);
+            air3 = 1;
+            printf("後あげ\n");
+            ThisThread::sleep_for(1s);
+            // air2 = 0;
+            // printf("中さげ\n");
+            // ThisThread::sleep_for(1s);
+            air3 = 0;
+            printf("後さげ\n");
+            state = false;
+            // getter.detach();
         }
     }
 }
 
 void stater(void){
-    getdata();
     if(batu){
         state = false;
-    }
-    else{
-        printf("running!\n");
     }
 }
 
