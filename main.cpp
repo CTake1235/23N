@@ -2,6 +2,7 @@
 #include "PS3.h"
 #include "BNO055.h"
 #include <cstdio>
+#include "PIDcontroller.h"
 
 // MDのアドレス
 #define MIGI_MAE        0x26
@@ -22,9 +23,15 @@ const int  BRK = 0x80;
 
 Ticker      getter;
 
-PS3         ps3(D8,D2);     //PA_9,PA_10
-I2C         motor(D14,D15); //PB_9, PB_8
-BNO055      ChiJiKisensor(PB_4,PA_8);
+PS3     ps3(D8,D2);     //PA_9,PA_10
+I2C     motor(D14,D15); //PB_9, PB_8
+BNO055	ChiJiKisensor(PB_4,PA_8);
+
+// PID(比例ゲイン、積分ゲイン、微分ゲイン、制御周期)
+PID		pid_mm(5.2, 0.0, 2.5, 0.050);
+PID		pid_hm(5.2, 0.0, 2.5, 0.050);
+PID 	pid_mu(5.2, 0.0, 2.5, 0.050);
+PID		pid_hu(5.2, 0.0, 2.5, 0.050);
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
