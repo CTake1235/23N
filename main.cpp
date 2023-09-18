@@ -13,6 +13,9 @@ const int  rawFWD = 0xa8;
 const int  rawBCK = 0xff - rawFWD;
 const int  BRK = 0x80;
 
+// duty比に直す前のパワーの「大きさ」
+int power[4] = {};
+
 // 計算したduty比を格納するやつ
 int	duty[4] = {};
 
@@ -135,10 +138,13 @@ int main(){
 
         // 自動角材超え開始
         else if(maru){
-            PIDsetter('a');
+            state = true;
+			PIDsetter('u');
         }
         else{
-			PIDsetter('b');
+			for(int i = 0; i < 4; i++){
+				duty[i] = 0x80;
+			}
         }
 		
 		for(int i = 0; i < 4; i++){
@@ -244,49 +250,72 @@ void stater(void){
 void PIDsetter(char btn){
 
 	// #hanagehogehogeを思い出せ
+	if(btn == 'R'){
 
-	// 入力範囲、目標値の指定 右を向いてるとき
-	if(ChiJiKisensor.euler.yaw < 90){
-		pid_mm.setInputLimits(0, 90);
-		pid_hm.setInputLimits(0, 90);
-		pid_mu.setInputLimits(0, 90);
-		pid_hu.setInputLimits(0, 90);
-
-		pid_mm.setSetPoint(0);
-		pid_hm.setSetPoint(0);
-		pid_mu.setSetPoint(0);
-		pid_hu.setSetPoint(0);
 	}
-	
-	// 入力範囲、目標値の指定 左を向いてるとき
-	else if(ChiJiKisensor.euler.yaw > 270){
-		pid_mm.setInputLimits(270, 360);
-		pid_hm.setInputLimits(270, 360);
-		pid_mu.setInputLimits(270, 360);
-		pid_hu.setInputLimits(270, 360);
+	else if(btn == 'L'){
 
-		pid_mm.setSetPoint(360);
-		pid_hm.setSetPoint(360);
-		pid_mu.setSetPoint(360);
-		pid_hu.setSetPoint(360);
 	}
+	else{
+		// 入力範囲、目標値の指定 右を向いてるとき
+		if(ChiJiKisensor.euler.yaw < 90){
+			pid_mm.setInputLimits(0, 90);
+			pid_hm.setInputLimits(0, 90);
+			pid_mu.setInputLimits(0, 90);
+			pid_hu.setInputLimits(0, 90);
 
-	// 入力値をとる
-	pid_mm.setProcessValue(ChiJiKisensor.euler.yaw);
-	pid_hm.setProcessValue(ChiJiKisensor.euler.yaw);
-	pid_mu.setProcessValue(ChiJiKisensor.euler.yaw);
-	pid_hu.setProcessValue(ChiJiKisensor.euler.yaw);
+			pid_mm.setSetPoint(0);
+			pid_hm.setSetPoint(0);
+			pid_mu.setSetPoint(0);
+			pid_hu.setSetPoint(0);
+			
+			// 右に傾いているので、右輪は正転方向、左輪は逆転方向に調整する
+			pid_mm.setOutputLimits(144, 255);
+			pid_hm.setOutputLimits(0, 	112);
+			pid_mu.setOutputLimits(144, 255);
+			pid_hu.setOutputLimits(0, 	112);
+		}
+		
+		// 入力範囲、目標値の指定 左を向いてるとき
+		else if(ChiJiKisensor.euler.yaw > 270){
+			pid_mm.setInputLimits(270, 360);
+			pid_hm.setInputLimits(270, 360);
+			pid_mu.setInputLimits(270, 360);
+			pid_hu.setInputLimits(270, 360);
 
+			pid_mm.setSetPoint(360);
+			pid_hm.setSetPoint(360);
+			pid_mu.setSetPoint(360);
+			pid_hu.setSetPoint(360);
 
-	switch (btn){
-		case 'u':
-			// 出力範囲の設定
-			pid_mm.setOutputLimits(0x80, rawFWD);
-			pid_hm.setOutputLimits(0x80, rawFWD);
-			pid_mu.setOutputLimits(0x80, rawFWD);
-			pid_hu.setOutputLimits(0x80, rawFWD);
+			// 左に傾いているので、右輪は逆転、左輪は正転
+			pid_mm.setOutputLimits(0, 	112);
+			pid_hm.setOutputLimits(144, 255);
+			pid_mu.setOutputLimits(0, 	112);
+			pid_hu.setOutputLimits(144, 255);
+		}
 
-			break;
+		// 入力値をとる
+		pid_mm.setProcessValue(ChiJiKisensor.euler.yaw);
+		pid_hm.setProcessValue(ChiJiKisensor.euler.yaw);
+		pid_mu.setProcessValue(ChiJiKisensor.euler.yaw);
+		pid_hu.setProcessValue(ChiJiKisensor.euler.yaw);
+
+		// 出すべき力の大きさを計算
+		power[0] = pid_mm.compute();
+		power[1] = pid_hm.compute();
+		power[2] = pid_mu.compute();
+		power[3] = pid_hu.compute();
+
+		switch (btn){
+			case 'u':
+				for(int i = 0; i < 4; i++) duty[i] = power[i];
+				break;
+			case 's':
+				for(int i = 0; i < 4; i++) duty[i] = 0xff - power[i];
+				break;
+
+		}
 	}
 
 }
