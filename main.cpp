@@ -4,31 +4,35 @@
 #include <cstdio>
 #include "PIDcontroller.h"
 
-// MDのアドレス
-#define MIGI_MAE        0x26
-#define HIDARI_MAE      0x54
-#define MIGI_USIRO      0x56
-#define HIDARI_USIRO    0x50
-
 #define WOOD            90 // [mm]
 
-// 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
-// const char  FWD = 0xe0;
-// const char  BCK = 0x20;
+Ticker	stopper;
 
 // 計算前、デフォルトのduty比
 const int  rawFWD = 0xa8;
 const int  rawBCK = 0xff - rawFWD;
 const int  BRK = 0x80;
 
-// 計算用duty
-int FWD = rawFWD;
-int	BCK = rawBCK;		
+// MDのアドレス、{右前, 左前, 右後, 左後}
+const int MDadd[4] = {0x26, 0x54, 0x56, 0x50};
+
+int	duty[4] = {};
 
 
 PS3     ps3(D8,D2);     //PA_9,PA_10
 I2C     motor(D14,D15); //PB_9, PB_8
 BNO055	ChiJiKisensor(PB_4,PA_8);
+/*
+#hanagehogehoge
+地磁気センサーの値のみかた[deg]
+^: ロボット、頂点が前
+センサーをてっぺんから見た図
+
+	0
+270 ^ 90
+	180
+
+*/
 
 // PID(比例ゲイン、積分ゲイン、微分ゲイン、制御周期)
 PID		pid_mm(5.2, 0.0, 2.5, 0.050);
@@ -54,16 +58,17 @@ AnalogIn    LC(PC_4); // 左中、これメイン
 AnalogIn    RB(PC_2); // 右後
 AnalogIn    LB(PC_3); // 左後
 
-void        send(int,int);
-void        getdata(void);
-void        sensor_reader(void);
-void        auto_run(void);
-void        stater(void);
+void	send(int,int);
+void    getdata(void);
+void    sensor_reader(void);
+void    auto_run(void);
+void    stater(void);
+void	PIDsetter(char);
 
 // デバッグ用関数
-void        debugger(void);
-bool ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L1,L2;
-bool state;
+void	debugger(void);
+bool	ue,sita,migi,hidari,select,start,batu,maru,sankaku,R1,R2,L1,L2;
+bool	state;
 
 double      dis = 0;
 float       value[6];
@@ -87,6 +92,7 @@ int main(){
     myled.write(1); // 見つかったら光らっせぱにしておく
 
 	ps3.myattach();
+	stopper.attach(&stater, 100ms);
 
     while (true) {
         sensor_reader();
@@ -100,46 +106,43 @@ int main(){
             sig = 0;
         }
         else if(ue){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  FWD);
+			PIDsetter('u');
         }
         else if(sita){
-            send(MIGI_MAE,      BCK);
-            send(HIDARI_MAE,    BCK);
-            send(MIGI_USIRO,    BCK);
-            send(HIDARI_USIRO,  BCK);
+			PIDsetter('s');
         }
         else if(migi){
-            send(MIGI_MAE,      BCK);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  BCK);
+			PIDsetter('m');
         }
         else if(hidari){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    BCK);
-            send(MIGI_USIRO,    BCK);
-            send(HIDARI_USIRO,  FWD);
+			PIDsetter('h');
         }
 
         else if(R1){
-            send(MIGI_MAE,      BCK);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    BCK);
-            send(HIDARI_USIRO,  FWD);
+			PIDsetter('R');
         }
 
         else if(L1){
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    BCK);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  BCK);
+			PIDsetter('L');
         }
 
+
+        // 自動角材超え開始
+        else if(maru){
+            PIDsetter('a');
+        }
+        else{
+			PIDsetter('b');
+        }
+		
+		for(int i = 0; i < 4; i++){
+			send(MDadd[i], duty[i]);
+		}
+
+		// ここからエアシリ手動制御
+
         // 前エアシリ下げ
-        else if(sankaku && R2)  air1.write(1);
+        if(sankaku && R2)  air1.write(1);
 
         // 後エアシリ下げ
         else if(sankaku && L2)  air3.write(1);
@@ -150,20 +153,6 @@ int main(){
         // 後エアシリ上げ
         else if(L2)             air3.write(0);
 
-        // 自動角材超え開始
-        else if(maru){
-            state = true;
-            send(MIGI_MAE,      FWD);
-            send(HIDARI_MAE,    FWD);
-            send(MIGI_USIRO,    FWD);
-            send(HIDARI_USIRO,  FWD);
-        }
-        else{
-            send(MIGI_MAE,      BRK);
-            send(HIDARI_MAE,    BRK);
-            send(MIGI_USIRO,    BRK);
-            send(HIDARI_USIRO,  BRK);
-        }
     }
 }
 
@@ -208,7 +197,6 @@ void sensor_reader(void){
 
     // 地磁気
     ChiJiKisensor.get_angles();
-
 }
 
 void auto_run(void){
@@ -232,6 +220,7 @@ void auto_run(void){
                 // ThisThread::sleep_for(1s);
                 air3 = 0;
                 printf("後さげ\n");
+				stopper.detach();
                 state = false;
         }
     }
@@ -246,12 +235,61 @@ void stater(void){
     }
 }
 
+void PIDsetter(char btn){
+
+	// #hanagehogehogeを思い出せ
+
+
+	// セクター1: 入力範囲の指定と目標値の指定
+
+	// 右を向いてるとき
+	if(ChiJiKisensor.euler.yaw < 90){
+		pid_mm.setInputLimits(0, 90);
+		pid_hm.setInputLimits(0, 90);
+		pid_mu.setInputLimits(0, 90);
+		pid_hu.setInputLimits(0, 90);
+
+		pid_mm.setSetPoint(0);
+		pid_hm.setSetPoint(0);
+		pid_mu.setSetPoint(0);
+		pid_hu.setSetPoint(0);
+	}
+	
+	// 左を向いてるとき
+	else if(ChiJiKisensor.euler.yaw > 270){
+		pid_mm.setInputLimits(270, 360);
+		pid_hm.setInputLimits(270, 360);
+		pid_mu.setInputLimits(270, 360);
+		pid_hu.setInputLimits(270, 360);
+
+		pid_mm.setSetPoint(360);
+		pid_hm.setSetPoint(360);
+		pid_mu.setSetPoint(360);
+		pid_hu.setSetPoint(360);
+	}
+	// セクター1ここまで
+
+	// セクター2: 出力範囲の設定
+	switch (btn){
+		case 'u':
+			// 出力範囲の設定
+			pid_mm.setOutputLimits(0x80, rawFWD);
+			pid_hm.setOutputLimits(0x80, rawFWD);
+			pid_mu.setOutputLimits(0x80, rawFWD);
+			pid_hu.setOutputLimits(0x80, rawFWD);
+
+			break;
+	}
+
+}
+
 void debugger(void){
     // 赤外線センサーのデータ
     // printf("value:\n右前: %f\t左前: %f\n右中: %f\t左中: %f\n右後: %f\t左後: %f\n",value[0],value[1],value[2],value[3],value[4],value[5]);
     printf("value: %lf\n",dis);
 
-    ChiJiKisensor.get_angles();
+	// 地磁気センサーのyaw値
+	printf("%f",ChiJiKisensor.euler.yaw);
 
     // 電源基板
     if(led.read() == 0)printf("12V:ON\n");
