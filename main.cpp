@@ -15,13 +15,16 @@
 // 車輪の前進、後退、ブレーキ、ゆっくり（角材超え）
 // const char  FWD = 0xe0;
 // const char  BCK = 0x20;
-const int  FWD = 0xa8;
-const int  BCK = 0xff - FWD;
+
+// 計算前、デフォルトのduty比
+const int  rawFWD = 0xa8;
+const int  rawBCK = 0xff - rawFWD;
 const int  BRK = 0x80;
 
+// 計算用duty
+int FWD = rawFWD;
+int	BCK = rawBCK;		
 
-
-Ticker      getter;
 
 PS3     ps3(D8,D2);     //PA_9,PA_10
 I2C     motor(D14,D15); //PB_9, PB_8
@@ -76,36 +79,20 @@ int main(){
     myled.write(0);
 
     // 0:右前 1:左前 2:右後 3:左後
-    char motor_duty[4] = {FWD,FWD,FWD,FWD};
+    char motor_duty[4] = {rawFWD,rawFWD,rawFWD,rawFWD};
 
     // 地磁気センサー初期化、見つかるまでLチカ
     ChiJiKisensor.reset();
     while(!ChiJiKisensor.check())myled.write(!myled.read());
     myled.write(1); // 見つかったら光らっせぱにしておく
+
+	ps3.myattach();
+
     while (true) {
-        getdata();
         sensor_reader();
         auto_run();
         debugger();
 
-        // やや右を向いてる
-        if(ChiJiKisensor.euler.yaw <= 90 && ChiJiKisensor.euler.yaw >= 10){
-            motor_duty[0] = FWD + 8;
-            motor_duty[2] = FWD + 8;
-        }
-
-        // やや左を向いてる
-        else if(ChiJiKisensor.euler.yaw <= 350 && ChiJiKisensor.euler.yaw >= 270){
-            motor_duty[1] = FWD + 8;
-            motor_duty[3] = FWD + 8;
-        }
-
-        // わりと正面やな
-        else{
-            for(int i = 0; i <= 3; i++){
-                motor_duty[i] = FWD;
-            }
-        }
         if(select == 1){
             sig = 1;
         }
@@ -226,7 +213,6 @@ void sensor_reader(void){
 
 void auto_run(void){
     while(state){
-        getter.attach(Callback<void()>(&stater),1ms);
         if(dis <= WOOD){
                 printf("エアシリ\n");
                 air1 = 1;
@@ -247,13 +233,11 @@ void auto_run(void){
                 air3 = 0;
                 printf("後さげ\n");
                 state = false;
-                getter.detach();
         }
     }
 }
 
 void stater(void){
-    getdata();
     if(batu){
         state = false;
     }
