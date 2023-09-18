@@ -13,10 +13,16 @@ const int  rawFWD = 0xa8;
 const int  rawBCK = 0xff - rawFWD;
 const int  BRK = 0x80;
 
+// 計算したduty比を格納するやつ
+int	duty[4] = {};
+
 // MDのアドレス、{右前, 左前, 右後, 左後}
 const int MDadd[4] = {0x26, 0x54, 0x56, 0x50};
 
-int	duty[4] = {};
+// 各ゲインをゲインゲインするやつ
+const float kp = 0.1;
+const float ki = 0.001;
+const float kd = 0.0;
 
 
 PS3     ps3(D8,D2);     //PA_9,PA_10
@@ -35,10 +41,10 @@ BNO055	ChiJiKisensor(PB_4,PA_8);
 */
 
 // PID(比例ゲイン、積分ゲイン、微分ゲイン、制御周期)
-PID		pid_mm(5.2, 0.0, 2.5, 0.050);
-PID		pid_hm(5.2, 0.0, 2.5, 0.050);
-PID 	pid_mu(5.2, 0.0, 2.5, 0.050);
-PID		pid_hu(5.2, 0.0, 2.5, 0.050);
+PID		pid_mm(kp, ki, kd, 0.050);
+PID		pid_hm(kp, ki, kd, 0.050);
+PID 	pid_mu(kp, ki, kd, 0.050);
+PID		pid_hu(kp, ki, kd, 0.050);
 
 //電源基板まわり
 DigitalOut  sig(PC_12);     //緊急停止（オンオフ）
@@ -239,10 +245,7 @@ void PIDsetter(char btn){
 
 	// #hanagehogehogeを思い出せ
 
-
-	// セクター1: 入力範囲の指定と目標値の指定
-
-	// 右を向いてるとき
+	// 入力範囲、目標値の指定 右を向いてるとき
 	if(ChiJiKisensor.euler.yaw < 90){
 		pid_mm.setInputLimits(0, 90);
 		pid_hm.setInputLimits(0, 90);
@@ -255,7 +258,7 @@ void PIDsetter(char btn){
 		pid_hu.setSetPoint(0);
 	}
 	
-	// 左を向いてるとき
+	// 入力範囲、目標値の指定 左を向いてるとき
 	else if(ChiJiKisensor.euler.yaw > 270){
 		pid_mm.setInputLimits(270, 360);
 		pid_hm.setInputLimits(270, 360);
@@ -267,9 +270,14 @@ void PIDsetter(char btn){
 		pid_mu.setSetPoint(360);
 		pid_hu.setSetPoint(360);
 	}
-	// セクター1ここまで
 
-	// セクター2: 出力範囲の設定
+	// 入力値をとる
+	pid_mm.setProcessValue(ChiJiKisensor.euler.yaw);
+	pid_hm.setProcessValue(ChiJiKisensor.euler.yaw);
+	pid_mu.setProcessValue(ChiJiKisensor.euler.yaw);
+	pid_hu.setProcessValue(ChiJiKisensor.euler.yaw);
+
+
 	switch (btn){
 		case 'u':
 			// 出力範囲の設定
