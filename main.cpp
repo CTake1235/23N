@@ -187,19 +187,31 @@ void sensor_reader(void){
 
 void auto_run(void){
     while(state){
-
+        int flag = 0;
+        bool finish = false;
         // ここでもgetdataがちゃんとattachしてるかチェック
         printf("%d\n",batu);
 
         sensor_reader();
         debugger();
-        if(dis[0] <= WOOD){
+        if(dis[0] <= WOOD && flag == 0){
             airF.write(1); // 前あげ
         }
-        else if(dis[1] <= WOOD){
+        else if(dis[1] <= WOOD && flag == 1){
             airF.write(0);
-            ThisThread::sleep_for(10ms);
+            ThisThread::sleep_for(100ms);
             airB.write(1);
+            for(int i = 0; i < 100; i++){
+                if(!state) finish = true;
+                break;
+                ThisThread::sleep_for(10ms);
+            }
+            airB.write(0);
+            if(finish){
+                finish = false;
+                flag = 0;
+                break;
+            }
         }
             // for(int counter = 0;counter < 4;counter++){
             //     if(!state)break;
