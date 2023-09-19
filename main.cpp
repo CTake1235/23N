@@ -270,10 +270,10 @@ void PIDsetter(char btn){
 			pid_hu.setSetPoint(0);
 			
 			// 右に傾いているので、右輪は正転方向、左輪は逆転方向に調整する
-			pid_mm.setOutputLimits(128,		255);
-			pid_hm.setOutputLimits(-128, 	0);
-			pid_mu.setOutputLimits(128, 	255);
-			pid_hu.setOutputLimits(-128,	0);
+			pid_mm.setOutputLimits(128,		rawFWD);
+			pid_hm.setOutputLimits(-128,	rawBCK);
+			pid_mu.setOutputLimits(128, 	rawFWD);
+			pid_hu.setOutputLimits(-128,	rawBCK);
 		}
 		
 		// 入力範囲、目標値の指定 左を向いてるとき
@@ -289,10 +289,10 @@ void PIDsetter(char btn){
 			pid_hu.setSetPoint(360);
 
 			// 左に傾いているので、右輪は逆転、左輪は正転
-			pid_mm.setOutputLimits(-128, 	0);
-			pid_hm.setOutputLimits(128,		255);
-			pid_mu.setOutputLimits(-128, 	0);
-			pid_hu.setOutputLimits(128, 	255);
+			pid_mm.setOutputLimits(-128, 	rawBCK);
+			pid_hm.setOutputLimits(128,		rawFWD);
+			pid_mu.setOutputLimits(-128, 	rawBCK);
+			pid_hu.setOutputLimits(128, 	rawFWD);
 		}
 
 		// 入力値をとる
