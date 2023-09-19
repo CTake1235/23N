@@ -314,6 +314,7 @@ void PIDsetter(char btn){
 			}
 		}
 
+		// ボタンごとに回転方向を変更
 		switch (btn){
 			case 'u':
 				for(int i = 0; i < 4; i++) duty[i] = power[i];
@@ -321,7 +322,24 @@ void PIDsetter(char btn){
 			case 's':
 				for(int i = 0; i < 4; i++) duty[i] = 0xff - power[i];
 				break;
-
+			case 'm':
+				for(int i = 0; i < 4; i++){
+					if(i == 0 || i == 3){
+						duty[i] = 0xff - power[i];
+					}else {
+						duty[i] = power[i];
+					}
+				}
+				break;
+			case 'h':
+				for(int i = 0; i < 4; i++){
+					if(i == 0 || i == 3){
+						duty[i] = power[i];
+					}else{
+						duty[i] = 0xff - power[i];
+					}
+				}
+				break;
 		}
 	}
 
