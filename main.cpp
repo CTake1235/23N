@@ -215,7 +215,10 @@ void auto_run(void){
 
             // 待機中の強制停止
             for(int i = 0; i < 100; i++){
-                if(batu) finish = true;
+                if(batu){
+                    finish = true;
+                    break;
+                }
                 ThisThread::sleep_for(10ms);
             }
             if(finish) break;
@@ -225,7 +228,10 @@ void auto_run(void){
 
             // 待機中の強制停止
             for(int i = 0; i < 10; i++){
-                if(batu) finish = true;
+                if(batu){
+                    finish = true;
+                    break;
+                } 
                 ThisThread::sleep_for(10ms);
             }
             if(finish) break;
@@ -234,7 +240,10 @@ void auto_run(void){
             // 待機中の強制停止
             printf("後あげ\n");
             for(int i = 0; i < 100; i++){
-                if(batu) finish = true;
+                if(batu){
+                    finish = true;
+                    break;
+                }
                 ThisThread::sleep_for(10ms);
             }
             if(finish) break;
