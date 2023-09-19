@@ -270,10 +270,10 @@ void PIDsetter(char btn){
 			pid_hu.setSetPoint(0);
 			
 			// 右に傾いているので、右輪は正転方向、左輪は逆転方向に調整する
-			pid_mm.setOutputLimits(144, 255);
-			pid_hm.setOutputLimits(0, 	112);
-			pid_mu.setOutputLimits(144, 255);
-			pid_hu.setOutputLimits(0, 	112);
+			pid_mm.setOutputLimits(128,		255);
+			pid_hm.setOutputLimits(-128, 	0);
+			pid_mu.setOutputLimits(128, 	255);
+			pid_hu.setOutputLimits(-128,	0);
 		}
 		
 		// 入力範囲、目標値の指定 左を向いてるとき
@@ -289,10 +289,10 @@ void PIDsetter(char btn){
 			pid_hu.setSetPoint(360);
 
 			// 左に傾いているので、右輪は逆転、左輪は正転
-			pid_mm.setOutputLimits(0, 	112);
-			pid_hm.setOutputLimits(144, 255);
-			pid_mu.setOutputLimits(0, 	112);
-			pid_hu.setOutputLimits(144, 255);
+			pid_mm.setOutputLimits(-128, 	0);
+			pid_hm.setOutputLimits(128,		255);
+			pid_mu.setOutputLimits(-128, 	0);
+			pid_hu.setOutputLimits(128, 	255);
 		}
 
 		// 入力値をとる
@@ -306,6 +306,13 @@ void PIDsetter(char btn){
 		power[1] = pid_hm.compute();
 		power[2] = pid_mu.compute();
 		power[3] = pid_hu.compute();
+
+		// 符号がマイナスならプラスにして逆転の0~128にする
+		for(int j = 1; j < 4; j++){
+			if(power[j] < 0){
+				power[j] = power[j] * -1;
+			}
+		}
 
 		switch (btn){
 			case 'u':
