@@ -71,7 +71,6 @@ void	send(int,int);
 void    getdata(void);
 void    sensor_reader(void);
 void    auto_run(void);
-void    stater(void);
 void	PIDsetter(char);
 
 // デバッグ用関数
@@ -101,7 +100,6 @@ int main(){
     myled.write(1); // 見つかったら光らっせぱにしておく
 
 	ps3.myattach();
-	stopper.attach(&stater, 100ms);
 
     while (true) {
         sensor_reader();
@@ -208,40 +206,46 @@ void sensor_reader(void){
 }
 
 void auto_run(void){
+    bool finish = false;
     while(state){
         if(dis <= WOOD){
-                printf("エアシリ\n");
-                air1 = 1;
-                printf("前あげ\n");
-                ThisThread::sleep_for(1s);
-                // air2 = 1;
-                // printf("中あげ\n");
-                // ThisThread::sleep_for(1s);
-                air1 = 0;
-                printf("前さげ\n");
-                ThisThread::sleep_for(100ms);
-                air3 = 1;
-                printf("後あげ\n");
-                ThisThread::sleep_for(1s);
-                // air2 = 0;
-                // printf("中さげ\n");
-                // ThisThread::sleep_for(1s);
-                air3 = 0;
-                printf("後さげ\n");
-				stopper.detach();
-                state = false;
+            printf("エアシリ\n");
+            air1 = 1;
+            printf("前あげ\n");
+
+            // 待機中の強制停止
+            for(int i = 0; i < 100; i++){
+                if(batu) finish = true;
+                ThisThread::sleep_for(10ms);
+            }
+            if(finish) break;
+
+            air1 = 0;
+            printf("前さげ\n");
+
+            // 待機中の強制停止
+            for(int i = 0; i < 10; i++){
+                if(batu) finish = true;
+                ThisThread::sleep_for(10ms);
+            }
+            if(finish) break;
+            air3 = 1;
+
+            // 待機中の強制停止
+            printf("後あげ\n");
+            for(int i = 0; i < 100; i++){
+                if(batu) finish = true;
+                ThisThread::sleep_for(10ms);
+            }
+            if(finish) break;
+            
+            air3 = 0;
+            printf("後さげ\n");
+            state = false;
         }
     }
 }
 
-void stater(void){
-    if(batu){
-        state = false;
-    }
-    else{
-        printf("running!\n");
-    }
-}
 
 void PIDsetter(char btn){
 
