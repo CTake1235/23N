@@ -202,8 +202,10 @@ void auto_run(void){
             ThisThread::sleep_for(100ms);
             airB.write(1);
             for(int i = 0; i < 100; i++){
-                if(!state) finish = true;
-                break;
+                if(!state) {
+                    finish = true;
+                    break;
+                }
                 ThisThread::sleep_for(10ms);
             }
             airB.write(0);
