@@ -35,7 +35,7 @@ BNO055	ChiJiKisensor(PB_4,PA_8);
 #hanagehogehoge
 地磁気センサーの値のみかた[deg]
 ^: ロボット、頂点が前
-センサーをてっぺんから見た図
+↓センサーをてっぺんから見た図↓
 
 	0
 270 ^ 90
@@ -146,10 +146,6 @@ int main(){
 				duty[i] = 0x80;
 			}
         }
-		
-		for(int i = 0; i < 4; i++){
-			send(MDadd[i], duty[i]);
-		}
 
 		// ここからエアシリ手動制御
 
@@ -340,6 +336,13 @@ void PIDsetter(char btn){
 					}
 				}
 				break;
+			default:
+				printf("[ERROR]\n");
+		}
+		
+		// データ送信
+		for(int i = 0; i < 4; i++){
+			send(MDadd[i], duty[i]);
 		}
 	}
 
