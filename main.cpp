@@ -367,7 +367,7 @@ void debugger(void){
     printf("value: %lf\n",dis);
 
 	// 地磁気センサーのyaw値
-	printf("%f",ChiJiKisensor.euler.yaw);
+	printf("yaw: %f\n",ChiJiKisensor.euler.yaw);
 
     // 電源基板
     if(led.read() == 0)printf("12V:ON\n");
