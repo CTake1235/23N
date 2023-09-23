@@ -68,10 +68,10 @@ int main(){
 
         debugger();
         
-        if(select == 1){
+        if(select){
             sig = 1;
         }
-        else if(start == 1){
+        else if(start){
             sig = 0;
         }
         else if(ue){
