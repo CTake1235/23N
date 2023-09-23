@@ -25,14 +25,14 @@ Ticker      getter;
 Ticker      runner;
 
 PS3         ps3		(PA_0, PA_1);
-I2C         motor	(PB_9, PC_6);
+I2C         motor	(PB_9, PB_8);
 
 //電源基板まわり
 DigitalOut  sig(PA_11);     //緊急停止（オンオフ）
 DigitalIn   led(PA_12);     //状態確認
 
 //エアシリンダーズ
-DigitalOut  airF(PC_15); // 前輪
+DigitalOut  airF(PA_13); // 前輪
 DigitalOut  airB(PH_1); // 後輪
 
 //赤外線センサーズ
