@@ -36,8 +36,8 @@ DigitalOut  airF(PC_15); // 前輪
 DigitalOut  airB(PH_1); // 後輪
 
 //赤外線センサーズ
-AnalogIn    sensorB(PA_6); // 右中
-AnalogIn    sensorF(PA_7); // 左中、これメイン
+AnalogIn    sensorF(PA_6); // 前
+AnalogIn    sensorB(PA_7); // 後
 
 void        send(char add, char dat);
 void        getdata(void);
