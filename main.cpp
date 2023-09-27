@@ -36,8 +36,8 @@ DigitalOut  airF(PA_13); // 前輪
 DigitalOut  airB(PH_1); // 後輪
 
 //赤外線センサーズ
-AnalogIn    sensorF(PA_6); // 前
-AnalogIn    sensorB(PA_7); // 後
+AnalogIn    sensorF(PC_0); // 前
+AnalogIn    sensorB(PC_1); // 後
 
 void        send(char add, char dat);
 void        getdata(void);
@@ -67,6 +67,7 @@ int main(){
     while (true) {
 
         debugger();
+        sensor_reader();
         
         if(select){
             sig = 1;
@@ -182,6 +183,8 @@ void sensor_reader(void){
     for(int i = 0; i < 2; i++){
         dis[i] = 71.463 * pow(value[i],-1.084);
     }
+    // dis[0] = 71.463 * pow(value[0],-1.084);
+    // dis[1] = 71.463 * pow(value[1],-1.084);
 }
 
 void auto_run(void){
